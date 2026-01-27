@@ -1,7 +1,11 @@
 <script setup>
 import BaseInput from '@/components/BaseInput.vue';
 import BaseButton from '@/components/BaseButton.vue';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
+import { ref } from 'vue';
 
+const showPassword = ref(false);
+const showConfirmPassword = ref(false);
 </script>
 
 <template>
@@ -21,16 +25,32 @@ import BaseButton from '@/components/BaseButton.vue';
                     label="Email"
                     placeholder="you@example.com"
                 />
-                <BaseInput
-                    type="password"
-                    label="Password"
-                    placeholder="••••••••"
-                />
-                <BaseInput
-                    type="password"
-                    label="Confirm Password"
-                    placeholder="••••••••"
-                />
+                <div class="relative">
+                    <BaseInput
+                        :type="showPassword ? 'text' : 'password'"
+                        label="Password"
+                        placeholder="••••••••"
+                    />
+
+                    <component
+                        :is="showPassword ? EyeSlashIcon : EyeIcon"
+                        class="size-5 text-gray-500 absolute right-3 bottom-3 cursor-pointer hover:text-gray-700 transition-colors duration-150"
+                        @click="showPassword = !showPassword"
+                    />
+                </div>
+                <div class="relative">
+                    <BaseInput
+                        :type="showConfirmPassword ? 'text' : 'password'"
+                        label="Confirm Password"
+                        placeholder="••••••••"
+                    />
+
+                    <component
+                        :is="showConfirmPassword ? EyeSlashIcon : EyeIcon"
+                        class="size-5 text-gray-500 absolute right-3 bottom-3 cursor-pointer hover:text-gray-700 transition-colors duration-150"
+                        @click="showConfirmPassword = !showConfirmPassword"
+                    />
+                </div>
                 <BaseButton type="submit" rounded fullWidth>CREATE ACCOUNT</BaseButton>
             </form>
             <p class="text-center text-sm text-gray-600 mt-6">
