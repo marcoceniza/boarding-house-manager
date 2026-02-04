@@ -1,10 +1,13 @@
 <script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import BaseInput from '@/components/BaseInput.vue';
 import BaseButton from '@/components/BaseButton.vue';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
-import { ref } from 'vue';
 
 const showPassword = ref(false);
+const router = useRouter();
+
 </script>
 
 <template>
@@ -42,7 +45,7 @@ const showPassword = ref(false);
             </form>
             <p class="text-center text-sm text-gray-600 mt-6">
                 Don’t have an account?
-                <a @click="$router.push('/register')"  class="text-indigo-600 cursor-pointer font-semibold hover:underline">Sign up</a>
+                <a @click="router.push('/register')"  class="text-indigo-600 cursor-pointer font-semibold hover:underline">Sign up</a>
             </p>
         </div>
     </div>

@@ -1,6 +1,4 @@
 <script setup>
-import Header from '@/components/Header.vue';
-
 const stats = [
     { label: 'Users', value: 128 },
     { label: 'Active Sessions', value: 42 },
@@ -12,8 +10,7 @@ const stats = [
 <template>
     <div class="min-h-screen flex bg-stone-100">
         <div class="flex-1 flex flex-col">
-            <Header />
-            <main class="flex-1 p-6 space-y-6">
+            <main class="flex-1 py-6 space-y-6">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div
                         v-for="stat in stats"
