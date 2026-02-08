@@ -42,14 +42,14 @@ const isActive = (path) => route.path === path;
                 >Rooms</RouterLink>
 
                 <RouterLink
-                    to="/dashboard/billing"
+                    to="/dashboard/billings"
                     :class="[
                         'block px-4 py-2 rounded-lg',
-                        isActive('/dashboard/billing')
+                        isActive('/dashboard/billings')
                         ? 'bg-stone-100 text-gray-800 font-semibold'
                         : 'text-white hover:bg-stone-100 hover:text-gray-800 hover:font-semibold'
                     ]"
-                >Billing</RouterLink>
+                >Billings</RouterLink>
 
                 <RouterLink
                     to="/dashboard/profile"

@@ -1,3 +1,27 @@
+<script setup>
+import { onMounted, reactive, ref } from 'vue';
+import BaseModal from '@/components/base/BaseModal.vue';
+import RoomForm from '@/components/RoomForm.vue';
+import { useRoomStore } from '@/stores/RoomStore';
+
+const showModal = ref(false);
+const showModalHandler = () => showModal.value = !showModal.value;
+const roomStore = useRoomStore();
+
+const formData = reactive({
+    type: '',
+    capacity: '',
+    price_per_month: '',
+    occupied: '',
+    status: ''
+});
+
+onMounted(() => {
+    roomStore.index();
+});
+
+</script>
+
 <template>
     <div class="flex justify-end items-center my-4">
         <button class="px-4 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700">
@@ -55,7 +79,7 @@
                         </span>
                     </td>
                     <td class="px-4 py-3 text-center space-x-2">
-                        <button class="px-3 py-1 text-xs bg-gray-600 text-white rounded hover:bg-gray-700">
+                        <button @click="showModalHandler" class="px-3 py-1 text-xs bg-gray-600 text-white rounded hover:bg-gray-700">
                             View
                         </button>
                         <button class="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
@@ -89,7 +113,7 @@
                         </span>
                     </td>
                     <td class="px-4 py-3 text-center space-x-2">
-                        <button class="px-3 py-1 text-xs bg-gray-600 text-white rounded hover:bg-gray-700">
+                        <button @click="showModalHandler" class="px-3 py-1 text-xs bg-gray-600 text-white rounded hover:bg-gray-700">
                             View
                         </button>
                         <button class="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
@@ -103,4 +127,7 @@
             </tbody>
         </table>
     </div>
+    <BaseModal @close="showModalHandler" :show="showModal">
+        <RoomForm />
+    </BaseModal>
 </template>

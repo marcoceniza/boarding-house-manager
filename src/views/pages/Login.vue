@@ -1,12 +1,19 @@
 <script setup>
-import { ref } from 'vue';
+import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import BaseInput from '@/components/BaseInput.vue';
-import BaseButton from '@/components/BaseButton.vue';
+import { useAuthStore } from '@/stores/AuthStore';
+import BaseInput from '@/components/base/BaseInput.vue';
+import BaseButton from '@/components/base/BaseButton.vue';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
 
 const showPassword = ref(false);
 const router = useRouter();
+const authStore = useAuthStore();
+
+const formData = reactive({
+    email: '',
+    password: '',
+});
 
 </script>
 
@@ -17,16 +24,18 @@ const router = useRouter();
                 <h1 class="text-3xl font-extrabold text-gray-800">Welcome Back</h1>
                 <p class="text-gray-500 mt-2">Please login to your account</p>
             </div>
-            <form @submit.prevent="login" class="space-y-5">
+            <form @submit.prevent="authStore.authentication('login', formData)" class="space-y-5">
                 <BaseInput
                     type="email"
                     label="Email"
+                    v-model="formData.email"
                     placeholder="you@example.com"
                 />
                 <div class="relative">
                     <BaseInput
                         :type="showPassword ? 'text' : 'password'"
                         label="Password"
+                        v-model="formData.password"
                         placeholder="••••••••"
                     />
 

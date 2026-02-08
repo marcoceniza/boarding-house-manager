@@ -1,3 +1,12 @@
+<script setup>
+import { ref } from 'vue';
+import BaseModal from '@/components/base/BaseModal.vue';
+import TenantForm from '@/components/TenantForm.vue';
+
+const showModal = ref(false);
+const showModalHandler = () => showModal.value = !showModal.value;
+</script>
+
 <template>
     <div class="overflow-x-auto bg-white mt-5 rounded-lg shadow">
         <table class="min-w-full border border-gray-200">
@@ -10,10 +19,13 @@
                         Name
                     </th>
                     <th class="px-4 py-3 text-left">
-                        Room
+                        Email
                     </th>
                     <th class="px-4 py-3 text-left">
-                        Monthly Rent
+                        Room ID
+                    </th>
+                    <th class="px-4 py-3 text-left">
+                        Move in Date
                     </th>
                     <th class="px-4 py-3 text-left">
                         Status
@@ -70,10 +82,10 @@
                         </span>
                     </td>
                     <td class="px-4 py-3 text-center space-x-2">
-                        <button class="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
+                        <button @click="showModalHandler" class="px-3 py-1 cursor-pointer text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
                             View
                         </button>
-                        <button class="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700">
+                        <button class="px-3 py-1 cursor-pointer text-xs bg-red-600 text-white rounded hover:bg-red-700">
                             Remove
                         </button>
                     </td>
@@ -81,4 +93,7 @@
             </tbody>
         </table>
     </div>
+    <BaseModal @close="showModalHandler" :show="showModal">
+        <TenantForm />
+    </BaseModal>
 </template>

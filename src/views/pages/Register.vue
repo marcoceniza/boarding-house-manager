@@ -1,37 +1,49 @@
 <script setup>
-import { ref } from 'vue';
+import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import BaseInput from '@/components/BaseInput.vue';
-import BaseButton from '@/components/BaseButton.vue';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
+import { useAuthStore } from '@/stores/AuthStore';
+import BaseInput from '@/components/base/BaseInput.vue';
+import BaseButton from '@/components/base/BaseButton.vue';
 
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 const router = useRouter();
+const authStore = useAuthStore();
+
+const formData = reactive({
+    name: '',
+    email: '',
+    password: '',
+    password_confirmation: ''
+});
 
 </script>
 
 <template>
     <div class="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-amber-50 via-stone-100 to-rose-50">
-        <div class="w-full max-w-md mx-auto p-8 rounded-2xl bg-white/90 backdrop-blur shadow-2xl">
+        <div class="w-full max-w-md mx-auto my-5 p-8 rounded-2xl bg-white/90 backdrop-blur shadow-2xl">
             <div class="text-center mb-8">
                 <h1 class="text-3xl font-extrabold text-gray-800">Create an Account</h1>
                 <p class="text-gray-500 mt-2">Sign up to get started</p>
             </div>
-            <form @submit.prevent="register" class="space-y-5">
+            <form @submit.prevent="authStore.authentication('register', formData)" class="space-y-5">
                 <BaseInput
                     label="Name"
+                    v-model="formData.name"
                     placeholder="Name"
                 />
                 <BaseInput
                     type="email"
                     label="Email"
+                    v-model="formData.email"
                     placeholder="you@example.com"
                 />
                 <div class="relative">
                     <BaseInput
                         :type="showPassword ? 'text' : 'password'"
                         label="Password"
+                        v-model="formData.password"
                         placeholder="••••••••"
                     />
 
@@ -45,6 +57,7 @@ const router = useRouter();
                     <BaseInput
                         :type="showConfirmPassword ? 'text' : 'password'"
                         label="Confirm Password"
+                        v-model="formData.password_confirmation"
                         placeholder="••••••••"
                     />
 

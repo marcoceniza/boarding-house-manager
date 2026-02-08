@@ -3,7 +3,7 @@ import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import DashboardHome from '@/views/pages/dashboard/DashboardHome.vue'
 import Tenants from '@/views/pages/dashboard/Tenants.vue'
 import Rooms from '@/views/pages/dashboard/Rooms.vue'
-import Billing from '@/views/pages/dashboard/Billing.vue'
+import Billings from '@/views/pages/dashboard/Billings.vue'
 import Profile from '@/views/pages/dashboard/Profile.vue'
 
 const router = createRouter({
@@ -21,7 +21,7 @@ const router = createRouter({
         { path: '', name: 'Dashboard', component: DashboardHome },
         { path: 'tenants', name: 'Tenants', component: Tenants },
         { path: 'rooms', name: 'Rooms', component: Rooms },
-        { path: 'billing', name: 'Billing', component: Billing },
+        { path: 'billings', name: 'Billings', component: Billings },
         { path: 'profile', name: 'Profile', component: Profile },
       ],
     },
