@@ -68,9 +68,9 @@ const inputClasses = computed(() => [
             <option
                 v-for="(option, idx) in options"
                 :key="idx"
-                :value="option"
+                :value="option.value"
             >
-                {{ option }}
+                {{ option.label }}
             </option>
         </select>
 

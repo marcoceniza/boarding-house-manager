@@ -14,24 +14,22 @@ return new class extends Migration
         Schema::create('billings', function (Blueprint $table) {
             $table->id();
             
-            $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
             // Tenant being billed
-            $table->foreignId('tenant_id')
-                ->constrained()
-                ->cascadeOnDelete();
+            $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
 
             // Billing month and year
             // Format: YYYY-MM
-            // Example: 2026-01, 2026-02
             $table->string('billing_period');
 
-            // Amount billed for the period
-            // Snapshot of room price at billing time
-            // Example: 3500.00
-            $table->decimal('amount', 10, 2);
+            // Amounts billed for the period
+            $table->decimal('rent', 10, 2)->default(0);
+            $table->decimal('water', 10, 2)->default(0);
+            $table->decimal('electricity', 10, 2)->default(0);
+
+            // Total amount (can calculate in model or DB)
+            $table->decimal('total', 10, 2);
 
             // Date when payment is due
-            // Example: 2026-01-10
             $table->date('due_date');
 
             // Billing payment status

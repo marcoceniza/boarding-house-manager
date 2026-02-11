@@ -12,8 +12,14 @@ class RoomController extends Controller
      */
     public function index()
     {
-        // $rooms = Room::with('tenants')->get(); // include tenants for each room
-        $rooms = ['test 1', 'test 2']; // include tenants for each room
+        try {
+    $rooms = Room::with('tenants')->get();
+} catch (\Throwable $e) {
+    return response()->json([
+        'error' => $e->getMessage(),
+        'trace' => $e->getTrace()
+    ], 500);
+}
 
         return response()->json([
             'success' => true,
@@ -28,10 +34,12 @@ class RoomController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'room_number' => 'required|string|max:10',
             'type' => 'required|string|max:50',
             'capacity' => 'required|integer|min:1',
             'price_per_month' => 'required|numeric|min:0',
-            'status' => 'nullable|string|in:available,full,maintenance',
+            'occupied' => 'required|integer|min:1',
+            'status' => 'nullable|string|in:Available,Full,Maintenance',
         ]);
 
         $room = Room::create($validated);
@@ -65,10 +73,12 @@ class RoomController extends Controller
         $room = Room::findOrFail($id);
 
         $validated = $request->validate([
-            'type' => 'sometimes|string|max:50',
-            'capacity' => 'sometimes|integer|min:1',
-            'price_per_month' => 'sometimes|numeric|min:0',
-            'status' => 'sometimes|string|in:available,full,maintenance',
+            'room_number' => 'required|string|max:10',
+            'type' => 'required|string|max:50',
+            'capacity' => 'required|integer|min:1',
+            'price_per_month' => 'required|numeric|min:0',
+            'occupied' => 'required|integer|min:1',
+            'status' => 'nullable|string|in:Available,Full,Maintenance',
         ]);
 
         $room->update($validated);

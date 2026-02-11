@@ -2,19 +2,21 @@ import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import api from '@/lib/axios';
 
-export const useRoomStore = defineStore('room', () => {
-  const rooms = ref([]);
+export const useTenantStore = defineStore('tenant', () => {
+  const tenants = ref([]);
   const viewData = ref(null);
   const isLoading = ref(false);
 
   /* =======================
-    Fetch all rooms
+    Fetch all tenants
   ======================= */
   const index = async () => {
     try {
       isLoading.value = true;
-      const res = await api.get('/api/rooms');
-      rooms.value = res.data.result;
+      const res = await api.get('/api/tenants');
+      tenants.value = res.data.result;
+
+      console.log(tenants.value);
     } catch (error) {
       console.error(error);
     } finally {
@@ -23,24 +25,24 @@ export const useRoomStore = defineStore('room', () => {
   }
 
   /* =======================
-    Create room
+    Create tenant
   ======================= */
   const store = async (data) => {
     try {
-      const res = await api.post('/api/rooms', data);
-      rooms.value.unshift(res.data.result); // optional instant UI update
+      const res = await api.post('/api/tenants', data);
+      tenants.value.unshift(res.data.result); // optional instant UI update
     } catch (error) {
       console.error(error);
     }
   }
 
   /* =======================
-    View single room
+    View single tenant
   ======================= */
   const show = async (id) => {
     try {
       isLoading.value = true;
-      const res = await api.get(`/api/rooms/${id}`);
+      const res = await api.get(`/api/tenants/${id}`);
       viewData.value = res.data.result;
     } catch (error) {
       console.error(error);
@@ -50,16 +52,16 @@ export const useRoomStore = defineStore('room', () => {
   }
 
   /* =======================
-    Update room
+    Update tenant
   ======================= */
   const update = async (id, data) => {
     try {
-      const res = await api.put(`/api/rooms/${id}`, data);
+      const res = await api.put(`/api/tenants/${id}`, data);
 
       // sync local list
-      const index = rooms.value.findIndex(r => r.id === id);
+      const index = tenants.value.findIndex(r => r.id === id);
       if (index !== -1) {
-        rooms.value[index] = res.data.result;
+        tenants.value[index] = res.data.result;
       }
 
       viewData.value = res.data.result;
@@ -79,7 +81,7 @@ export const useRoomStore = defineStore('room', () => {
   index()
 
   return {
-    rooms,
+    tenants,
     viewData,
     isLoading,
     index,

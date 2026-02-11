@@ -28,11 +28,12 @@ class TenantController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:50',
+            'last_name' => 'required|string|max:50',
             'email' => 'required|email|unique:tenants,email',
             'room_id' => 'required|exists:rooms,id',
             'move_in_date' => 'required|date',
-            'status' => 'nullable|string|in:active,left,inactive',
+            'status' => 'nullable|string|in:Active,Left,Inactive',
         ]);
 
         $tenant = Tenant::create($validated);
@@ -66,11 +67,12 @@ class TenantController extends Controller
         $tenant = Tenant::findOrFail($id);
 
         $validated = $request->validate([
-            'name' => 'sometimes|string|max:255',
+            'first_name' => 'required|string|max:50',
+            'last_name' => 'required|string|max:50',
             'email' => 'sometimes|email|unique:tenants,email,' . $tenant->id,
-            'room_id' => 'sometimes|exists:rooms,id',
+            'room_id' => 'required|exists:rooms,id',
             'move_in_date' => 'sometimes|date',
-            'status' => 'sometimes|string|in:active,left,inactive',
+            'status' => 'sometimes|string|in:Active,Left,Inactive',
         ]);
 
         $tenant->update($validated);

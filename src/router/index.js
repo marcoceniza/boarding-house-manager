@@ -9,11 +9,6 @@ import Profile from '@/views/pages/dashboard/Profile.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    // {
-    //   path: '/',
-    //   name: 'home',
-    //   component: HomeView,
-    // },
     {
       path: '/dashboard',
       component: DashboardLayout,
@@ -36,6 +31,23 @@ const router = createRouter({
       component: () => import('../views/pages/Register.vue'),
     },
   ],
+})
+
+// Global auth/guest guard
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('token')
+  const publicPages = ['login', 'register']
+  const authRequired = !publicPages.includes(to.name)
+
+  if (authRequired && !token) {
+    return next({ name: 'login' })
+  }
+
+  if (token && publicPages.includes(to.name)) {
+    return next({ name: 'Dashboard' })
+  }
+
+  next()
 })
 
 export default router

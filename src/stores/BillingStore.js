@@ -2,19 +2,21 @@ import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import api from '@/lib/axios';
 
-export const useRoomStore = defineStore('room', () => {
-  const rooms = ref([]);
+export const useBillingStore = defineStore('billing', () => {
+  const billings = ref([]);
   const viewData = ref(null);
   const isLoading = ref(false);
 
   /* =======================
-    Fetch all rooms
+    Fetch all billings
   ======================= */
   const index = async () => {
     try {
       isLoading.value = true;
-      const res = await api.get('/api/rooms');
-      rooms.value = res.data.result;
+      const res = await api.get('/api/billings');
+      billings.value = res.data.result;
+
+      console.log(billings.value);
     } catch (error) {
       console.error(error);
     } finally {
@@ -23,24 +25,24 @@ export const useRoomStore = defineStore('room', () => {
   }
 
   /* =======================
-    Create room
+    Create billing
   ======================= */
   const store = async (data) => {
     try {
-      const res = await api.post('/api/rooms', data);
-      rooms.value.unshift(res.data.result); // optional instant UI update
+      const res = await api.post('/api/billings', data);
+      billings.value.unshift(res.data.result); // optional instant UI update
     } catch (error) {
       console.error(error);
     }
   }
 
   /* =======================
-    View single room
+    View single billing
   ======================= */
   const show = async (id) => {
     try {
       isLoading.value = true;
-      const res = await api.get(`/api/rooms/${id}`);
+      const res = await api.get(`/api/billings/${id}`);
       viewData.value = res.data.result;
     } catch (error) {
       console.error(error);
@@ -50,16 +52,16 @@ export const useRoomStore = defineStore('room', () => {
   }
 
   /* =======================
-    Update room
+    Update billing
   ======================= */
   const update = async (id, data) => {
     try {
-      const res = await api.put(`/api/rooms/${id}`, data);
+      const res = await api.put(`/api/billings/${id}`, data);
 
       // sync local list
-      const index = rooms.value.findIndex(r => r.id === id);
+      const index = billings.value.findIndex(r => r.id === id);
       if (index !== -1) {
-        rooms.value[index] = res.data.result;
+        billings.value[index] = res.data.result;
       }
 
       viewData.value = res.data.result;
@@ -75,17 +77,31 @@ export const useRoomStore = defineStore('room', () => {
     viewData.value = null;
   }
 
+  /* =======================
+    Send invoice
+  ======================= */
+  const sendInvoice  = async (id) => {
+    try {
+      const res = await api.post(`/api/billings/${id}/send-invoice`);
+      
+      console.log(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   // auto fetch
   index()
 
   return {
-    rooms,
+    billings,
     viewData,
     isLoading,
     index,
     store,
     show,
     update,
-    clearViewData
+    clearViewData,
+    sendInvoice
   }
 })

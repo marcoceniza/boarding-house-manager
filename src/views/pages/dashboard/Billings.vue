@@ -1,135 +1,100 @@
+<script setup>
+import { ref } from "vue";
+import dayjs from "dayjs";
+import { useBillingStore } from "@/stores/BillingStore";
+import BaseModal from "@/components/base/BaseModal.vue";
+import BillingForm from "@/components/BillingForm.vue";
+
+const billingStore = useBillingStore();
+
+const showModal = ref(false);
+const currentMode = ref("Add");
+const selectedBilling = ref(null);
+
+// Handlers
+const openAddBilling = () => {
+    selectedBilling.value = null;
+    currentMode.value = "Add";
+    showModal.value = true;
+};
+</script>
+
 <template>
-    <div class="bg-white rounded-lg mt-5 shadow overflow-x-auto">
+    <div class="flex justify-end items-center my-4">
+        <button
+            @click="openAddBilling"
+            class="px-4 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+        >
+            + Add Billing
+        </button>
+    </div>
+
+    <div class="bg-white rounded-lg shadow overflow-x-auto">
         <table class="min-w-full border border-gray-200">
             <thead class="bg-gray-100 text-gray-700 text-sm uppercase">
                 <tr>
-                    <th class="px-4 py-3 text-left">
-                        Billing ID
-                    </th>
-                    <th class="px-4 py-3 text-left">
-                        Tenant
-                    </th>
-                    <th class="px-4 py-3 text-left">
-                        Room
-                    </th>
-                    <th class="px-4 py-3 text-left">
-                        Billing Period
-                    </th>
-                    <th class="px-4 py-3 text-left">
-                        Amount
-                    </th>
-                    <th class="px-4 py-3 text-left">
-                        Due Date
-                    </th>
-                    <th class="px-4 py-3 text-left">
-                        Status
-                    </th>
-                    <th class="px-4 py-3 text-center">
-                        Actions
-                    </th>
+                    <th class="px-4 py-3 text-left">Tenant</th>
+                    <th class="px-4 py-3 text-left">Tenant Email</th>
+                    <th class="px-4 py-3 text-left">Billing Period</th>
+                    <th class="px-4 py-3 text-left">Rent</th>
+                    <th class="px-4 py-3 text-left">Water</th>
+                    <th class="px-4 py-3 text-left">Electricity</th>
+                    <th class="px-4 py-3 text-left">Total</th>
+                    <th class="px-4 py-3 text-left">Due Date</th>
+                    <th class="px-4 py-3 text-left">Status</th>
+                    <th>Invoice</th>
+                    <th class="px-4 py-3 text-center">Actions</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 text-sm">
-                <!-- Paid -->
-                <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3">
-                        B-0001
-                    </td>
-                    <td class="px-4 py-3 font-medium">
-                        Juan Dela Cruz
-                    </td>
-                    <td class="px-4 py-3">
-                        Room 101
-                    </td>
-                    <td class="px-4 py-3">
-                        Jan 2026
-                    </td>
-                    <td class="px-4 py-3 font-semibold">
-                        ₱3,500
-                    </td>
-                    <td class="px-4 py-3">
-                        Jan 05, 2026
-                    </td>
-                    <td class="px-4 py-3">
-                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700">
-                            Paid
-                        </span>
+                <tr v-for="billing in billingStore.billings" :key="billing.id" class="hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium">{{ billing.tenant.first_name }} {{ billing.tenant.last_name }}</td>
+                    <td class="px-4 py-3 font-medium">{{ billing.tenant.email }}</td>
+                    <td class="px-4 py-3 font-medium">{{ dayjs(billing.billing_period).format('MMMM YYYY') }}</td>
+                    <td class="px-4 py-3 font-medium">₱{{ billing.rent.toFixed(2) }}</td>
+                    <td class="px-4 py-3 font-medium">₱{{ billing.water.toFixed(2) }}</td>
+                    <td class="px-4 py-3 font-medium">₱{{ billing.electricity.toFixed(2) }}</td>
+                    <td class="px-4 py-3 font-medium">₱{{ billing.total.toFixed(2) }}</td>
+                    <td class="px-4 py-3 font-medium">{{ dayjs(billing.due_date).format('MMMM D, YYYY') }}</td>
+                    <td class="px-4 py-3 font-medium">{{ billing.status }}</td>
+                    <td class="px-4 py-3 text-center space-x-2">
+                        <button
+                            @click="billingStore.sendInvoice(billing.id)"
+                            class="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
+                        >
+                            Send Invoice
+                        </button>
                     </td>
                     <td class="px-4 py-3 text-center space-x-2">
-                        <button class="px-3 py-1 text-xs bg-gray-600 text-white rounded hover:bg-gray-700">
+                        <button
+                            @click="billingStore.show(billing.id); currentMode = 'View'; showModal = true"
+                            class="px-3 py-1 text-xs bg-gray-600 text-white rounded hover:bg-gray-700"
+                        >
                             View
                         </button>
-                    </td>
-                </tr>
-                <!-- Unpaid -->
-                <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3">
-                        B-0002
-                    </td>
-                    <td class="px-4 py-3 font-medium">
-                        Maria Santos
-                    </td>
-                    <td class="px-4 py-3">
-                        Room 102
-                    </td>
-                    <td class="px-4 py-3">
-                        Jan 2026
-                    </td>
-                    <td class="px-4 py-3 font-semibold">
-                        ₱4,000
-                    </td>
-                    <td class="px-4 py-3 text-red-600 font-medium">
-                        Jan 05, 2026
-                    </td>
-                    <td class="px-4 py-3">
-                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-700">
-                            Unpaid
-                        </span>
-                    </td>
-                    <td class="px-4 py-3 text-center space-x-2">
-                        <button class="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
-                            Mark Paid
+                        <button
+                            @click="billingStore.show(billing.id); currentMode = 'Edit'; showModal = true"
+                            class="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                        >
+                            Edit
                         </button>
-                        <button class="px-3 py-1 text-xs bg-gray-600 text-white rounded hover:bg-gray-700">
-                            View
-                        </button>
-                    </td>
-                </tr>
-                <!-- Overdue -->
-                <tr class="hover:bg-red-50">
-                    <td class="px-4 py-3">
-                        B-0003
-                    </td>
-                    <td class="px-4 py-3 font-medium">
-                        Pedro Reyes
-                    </td>
-                    <td class="px-4 py-3">
-                        Room 103
-                    </td>
-                    <td class="px-4 py-3">
-                        Dec 2025
-                    </td>
-                    <td class="px-4 py-3 font-semibold">
-                        ₱3,200
-                    </td>
-                    <td class="px-4 py-3 text-red-600 font-semibold">
-                        Dec 05, 2025
-                    </td>
-                    <td class="px-4 py-3">
-                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-700">
-                            Overdue
-                        </span>
-                    </td>
-                    <td class="px-4 py-3 text-center space-x-2">
-                        <button class="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
-                            Mark Paid
-                        </button>
-                        <button class="px-3 py-1 text-xs bg-gray-600 text-white rounded hover:bg-gray-700">
-                            View
+                        <button
+                            @click="billingStore.delete(billing.id)"
+                            class="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700"
+                        >
+                            Delete
                         </button>
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
+
+    <!-- Modal -->
+    <BaseModal
+        :show="showModal"
+        @close="showModal = false; billingStore.clearViewData()"
+    >
+        <BillingForm :mode="currentMode" />
+    </BaseModal>
 </template>

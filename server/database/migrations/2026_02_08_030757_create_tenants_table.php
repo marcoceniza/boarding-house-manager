@@ -14,9 +14,13 @@ return new class extends Migration
         Schema::create('tenants', function (Blueprint $table) {
             $table->id();
             
-            // Full name of the tenant
-            // Example: Juan Dela Cruz
-            $table->string('name');
+            // First name of the tenant
+            // Example: John
+            $table->string('first_name');
+
+            // Last name of the tenant
+            // Example: Doe
+            $table->string('last_name');
 
             // Tenant email address (used for billing notifications)
             // Example: juan.delacruz@email.com

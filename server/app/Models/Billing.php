@@ -9,16 +9,33 @@ class Billing extends Model
     protected $fillable = [
         'tenant_id',
         'billing_period',
-        'amount',
+        'rent',
+        'water',
+        'electricity',
+        'total',
         'due_date',
         'status',
     ];
 
     protected $casts = [
         'due_date' => 'date',
+        // Keep billing_period as string, e.g., '2026-02'
+        'billing_period' => 'string',
     ];
 
-    public function tenant() {
+    // Automatically calculate total before saving
+    protected static function booted()
+    {
+        static::saving(function ($billing) {
+            $billing->rent = $billing->rent ?? 0;
+            $billing->water = $billing->water ?? 0;
+            $billing->electricity = $billing->electricity ?? 0;
+            $billing->total = $billing->rent + $billing->water + $billing->electricity;
+        });
+    }
+
+    public function tenant()
+    {
         return $this->belongsTo(Tenant::class);
     }
 }
