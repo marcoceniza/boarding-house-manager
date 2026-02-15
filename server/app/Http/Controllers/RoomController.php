@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Room;
+use Illuminate\Validation\ValidationException;
 
 class RoomController extends Controller
 {
@@ -12,13 +13,12 @@ class RoomController extends Controller
      */
     public function index()
     {
-        // $rooms = Room::with('tenants')->get(); // include tenants for each room
-        $rooms = ['test 1', 'test 2']; // include tenants for each room
+        $rooms = Room::with('tenants')->get();
 
         return response()->json([
             'success' => true,
             'message' => 'Rooms fetched successfully',
-            'result' => $rooms
+            'result'  => $rooms
         ]);
     }
 
@@ -28,18 +28,22 @@ class RoomController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'type' => 'required|string|max:50',
-            'capacity' => 'required|integer|min:1',
+            'room_number'     => 'required|string|max:10|unique:rooms,room_number',
+            'type'            => 'required|string|max:50',
+            'capacity'        => 'required|integer|min:1',
             'price_per_month' => 'required|numeric|min:0',
-            'status' => 'nullable|string|in:available,full,maintenance',
         ]);
+
+        // New rooms always start empty
+        $validated['occupied'] = 0;
+        $validated['status']   = 'Available';
 
         $room = Room::create($validated);
 
         return response()->json([
             'success' => true,
             'message' => 'Room created successfully',
-            'result' => $room
+            'result'  => $room
         ]);
     }
 
@@ -53,7 +57,7 @@ class RoomController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Room details fetched successfully',
-            'result' => $room
+            'result'  => $room
         ]);
     }
 
@@ -65,18 +69,33 @@ class RoomController extends Controller
         $room = Room::findOrFail($id);
 
         $validated = $request->validate([
-            'type' => 'sometimes|string|max:50',
-            'capacity' => 'sometimes|integer|min:1',
-            'price_per_month' => 'sometimes|numeric|min:0',
-            'status' => 'sometimes|string|in:available,full,maintenance',
+            'room_number'     => 'required|string|max:10|unique:rooms,room_number,' . $room->id,
+            'type'            => 'required|string|max:50',
+            'capacity'        => 'required|integer|min:1',
+            'price_per_month' => 'required|numeric|min:0',
+            'status'          => 'nullable|in:Available,Occupied,Maintenance',
         ]);
+
+        // ❗ Prevent shrinking capacity below current occupancy
+        if ($validated['capacity'] < $room->occupied) {
+            throw ValidationException::withMessages([
+                'capacity' => 'Capacity cannot be less than current occupied count.'
+            ]);
+        }
+
+        // Auto-calculate status unless manually set to Maintenance
+        if (($validated['status'] ?? null) !== 'Maintenance') {
+            $validated['status'] = $room->occupied >= $validated['capacity']
+                ? 'Occupied'
+                : 'Available';
+        }
 
         $room->update($validated);
 
         return response()->json([
             'success' => true,
             'message' => 'Room updated successfully',
-            'result' => $room
+            'result'  => $room
         ]);
     }
 
@@ -86,6 +105,15 @@ class RoomController extends Controller
     public function destroy(string $id)
     {
         $room = Room::findOrFail($id);
+
+        // Prevent deleting a room with active tenants
+        if ($room->occupied > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete a room with active tenants.'
+            ], 422);
+        }
+
         $room->delete();
 
         return response()->json([

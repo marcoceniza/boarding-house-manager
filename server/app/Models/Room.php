@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Tenant;
 
 class Room extends Model
 {
     protected $fillable = [
+        'room_number',
         'type',
         'capacity',
         'price_per_month',

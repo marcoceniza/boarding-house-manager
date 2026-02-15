@@ -14,26 +14,26 @@ return new class extends Migration
         Schema::create('rooms', function (Blueprint $table) {
             $table->id();
 
+            // Unique room identifier shown to tenants/admin
+            $table->string('room_number')->unique();
+
             // Room category or layout
-            // Examples: Single, Double, Studio, Family
             $table->string('type');
 
             // Maximum number of tenants allowed in this room
-            // Example: 1, 2, 4
             $table->unsignedInteger('capacity');
 
             // Monthly rental price for this room
-            // Example: 3500.00, 5500.00
             $table->decimal('price_per_month', 10, 2);
 
             // Cached count of current tenants in the room
-            // Example: 0, 1, 2
             $table->unsignedInteger('occupied')->default(0);
 
-            // Current room status
-            // Possible values: available, full, maintenance
-            $table->string('status')->default('available');
-            
+            // Current room status as numeric code
+            // 0 = Available, 1 = Occupied, 2 = Maintenance
+            $table->tinyInteger('status')->default(0)
+                    ->comment('0 = Available, 1 = Occupied, 2 = Maintenance');
+
             $table->timestamps();
         });
     }

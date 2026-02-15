@@ -32,16 +32,18 @@ class BillingController extends Controller
         $validated = $request->validate([
             'tenant_id' => 'required|exists:tenants,id',
             'billing_period' => 'required|string', // e.g., '2026-02'
-            'amount' => 'required|numeric|min:0',
+            'rent' => 'required|numeric|min:0',
+            'water' => 'nullable|numeric|min:0',
+            'electricity' => 'nullable|numeric|min:0',
             'due_date' => 'required|date',
-            'status' => 'nullable|string|in:unpaid,paid,overdue',
+            'status' => 'nullable|string|in:Unpaid,Paid,Overdue',
         ]);
 
-        // Optional: automatically fill amount from tenant's room price if not provided
-        if (!isset($validated['amount'])) {
-            $validated['amount'] = Tenant::find($validated['tenant_id'])->room->price_per_month;
-        }
+        // Set default 0 for optional fields
+        $validated['water'] = $validated['water'] ?? 0;
+        $validated['electricity'] = $validated['electricity'] ?? 0;
 
+        // Create billing (total will be calculated automatically in the model)
         $billing = Billing::create($validated);
 
         return response()->json([
@@ -75,11 +77,14 @@ class BillingController extends Controller
         $validated = $request->validate([
             'tenant_id' => 'sometimes|exists:tenants,id',
             'billing_period' => 'sometimes|string',
-            'amount' => 'sometimes|numeric|min:0',
+            'rent' => 'sometimes|numeric|min:0',
+            'water' => 'sometimes|numeric|min:0',
+            'electricity' => 'sometimes|numeric|min:0',
             'due_date' => 'sometimes|date',
-            'status' => 'sometimes|string|in:unpaid,paid,overdue',
+            'status' => 'nullable|string|in:Unpaid,Paid,Overdue',
         ]);
 
+        // Update billing (total will be recalculated automatically in the model)
         $billing->update($validated);
 
         return response()->json([
@@ -106,25 +111,13 @@ class BillingController extends Controller
     /**
      * Send invoice to the tenant's email.
      */
-    public function sendInvoice()
+    public function sendInvoice($id)
     {
-        // fake billing data (NO DB)
-        $billing = (object) [
-            'id' => 1,
-            'tenant' => (object) [
-                'email' => 'marcoceniza20@gmail.com',
-                'name'  => 'Marco',
-            ],
-            'room' => (object) [
-                'name' => 'Room 3',
-                'rate' => 999,
-            ],
-            'period' => 'February 2026',
-            'due_date' => now()->addDays(7),
-        ];
+        $billing = Billing::with('tenant')->findOrFail($id);
 
-        Mail::to('marcoceniza20@gmail.com')
-            ->send(new InvoiceMail($billing));
+        $tenantEmail = $billing->tenant->email;
+
+        Mail::to($tenantEmail)->send(new InvoiceMail($billing));
 
         return response()->json([
             'message' => 'Test invoice sent successfully'

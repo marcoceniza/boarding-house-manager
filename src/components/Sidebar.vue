@@ -22,16 +22,6 @@ const isActive = (path) => route.path === path;
                 >Dashboard</RouterLink>
 
                 <RouterLink
-                    to="/dashboard/tenants"
-                    :class="[
-                        'block px-4 py-2 rounded-lg',
-                        isActive('/dashboard/tenants')
-                        ? 'bg-stone-100 text-gray-800 font-semibold'
-                        : 'text-white hover:bg-stone-100 hover:text-gray-800 hover:font-semibold'
-                    ]"
-                >Tenants</RouterLink>
-
-                <RouterLink
                     to="/dashboard/rooms"
                     :class="[
                         'block px-4 py-2 rounded-lg',
@@ -40,6 +30,16 @@ const isActive = (path) => route.path === path;
                         : 'text-white hover:bg-stone-100 hover:text-gray-800 hover:font-semibold'
                     ]"
                 >Rooms</RouterLink>
+
+                <RouterLink
+                    to="/dashboard/tenants"
+                    :class="[
+                        'block px-4 py-2 rounded-lg',
+                        isActive('/dashboard/tenants')
+                        ? 'bg-stone-100 text-gray-800 font-semibold'
+                        : 'text-white hover:bg-stone-100 hover:text-gray-800 hover:font-semibold'
+                    ]"
+                >Tenants</RouterLink>
 
                 <RouterLink
                     to="/dashboard/billings"

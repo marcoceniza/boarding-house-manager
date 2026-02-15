@@ -1,18 +1,21 @@
 <script setup>
 const props = defineProps({
-    show: { type: Boolean, required: true },
+    isOpen: { type: Boolean, required: true },
     title: { type: String, default: "Modal Title" },
-    mode: { type: String, default: "view" } // add, edit, delete, view
+    titleBadge: { type: String, default: "" },
+    titleBadgeClass: { type: String, default: "" },
+    mode: { type: String, default: "view" },
 });
-const emit = defineEmits(["close"]);
-const close = () => emit("close");
+
+const emit = defineEmits(["update:isOpen"]);
+const close = () => emit("update:isOpen", false);
 </script>
 
 <template>
     <transition name="fade">
         <div
-            v-if="props.show"
-            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            v-if="props.isOpen"
+            class="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
             @click.self="close"
         >
             <transition name="scale">
@@ -20,13 +23,26 @@ const close = () => emit("close");
                     class="bg-white rounded-2xl shadow-lg max-w-lg w-full p-6 relative"
                     @keydown.escape.window="close"
                 >
+                    <!-- Modal Header -->
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-semibold">{{ props.title }}</h3>
-                        <button @click="close" class="text-gray-400 hover:text-gray-600">&times;</button>
+                        <h3 class="text-lg font-semibold flex items-center gap-2">
+                            {{ props.title }}
+                            <span
+                                v-if="props.titleBadge"
+                                :class="`px-2 py-1 rounded-full text-sm font-semibold ${props.titleBadgeClass}`"
+                            >
+                                {{ props.titleBadge }}
+                            </span>
+                        </h3>
+                        <button @click="close" class="text-gray-400 cursor-pointer absolute right-3 top-1 text-2xl hover:text-gray-600">&times;</button>
                     </div>
+
+                    <!-- Modal Body -->
                     <div>
                         <slot></slot>
                     </div>
+
+                    <!-- Modal Footer -->
                     <div v-if="$slots.footer" class="mt-4">
                         <slot name="footer"></slot>
                     </div>
@@ -46,7 +62,7 @@ const close = () => emit("close");
     opacity: 0;
 }
 .scale-enter-active {
-transition: transform 0.2s ease, opacity 0.2s ease;
+    transition: transform 0.2s ease, opacity 0.2s ease;
 }
 .scale-enter-from {
     transform: scale(0.9);

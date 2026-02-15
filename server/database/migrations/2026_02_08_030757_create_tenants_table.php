@@ -13,27 +13,26 @@ return new class extends Migration
     {
         Schema::create('tenants', function (Blueprint $table) {
             $table->id();
-            
-            // Full name of the tenant
-            // Example: Juan Dela Cruz
-            $table->string('name');
+
+            // First name of the tenant
+            $table->string('first_name');
+
+            // Last name of the tenant
+            $table->string('last_name');
 
             // Tenant email address (used for billing notifications)
-            // Example: juan.delacruz@email.com
             $table->string('email')->unique();
 
             // Reference to the room the tenant occupies
-            $table->foreignId('room_id')
-                ->constrained()
-                ->cascadeOnDelete();
+            $table->foreignId('room_id')->constrained()->cascadeOnDelete();
 
             // Date when tenant moved in
-            // Example: 2026-01-15
             $table->date('move_in_date');
 
-            // Tenant status in the boarding house
-            // Possible values: active, left, inactive
-            $table->string('status')->default('active');
+            // Tenant status as numeric code
+            // 0 = Inactive, 1 = Active, 2 = Left
+            $table->tinyInteger('status')->default(1)
+                    ->comment('0 = Inactive, 1 = Active, 2 = Left');
 
             $table->timestamps();
         });

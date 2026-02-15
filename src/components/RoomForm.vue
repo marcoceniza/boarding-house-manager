@@ -1,91 +1,161 @@
 <script setup>
-import { reactive, watch, computed, ref } from "vue";
+import { reactive, watch, computed } from "vue";
+import dayjs from "dayjs";
 import BaseInput from "./base/BaseInput.vue";
+import BaseButton from "./base/BaseButton.vue";
+import { useRoomStore } from "@/stores/RoomStore";
 
-const props = defineProps({
-    data:{ type: Object, default: null },
-    mode: { type: String, default: "add" } // add | edit | view
-});
-const emit = defineEmits(["submit", "cancel"]);
-const form = reactive({
-    name: "",
-    email: "",
-    room: "",
-    contact: "",
+const roomStore = useRoomStore();
+
+const emit = defineEmits(["close"]);
+const props = defineProps({ mode: { type: String, default: "Add" } });
+
+const formData = reactive({
+    room_number: "",
+    type: "",
+    capacity: "",
+    price_per_month: "",
+    occupied: 0,
+    status: 0,
 });
 
-// populate form when editing / viewing
-watch(() => props.data,
-    (newData) => {
-        if (newData) {
-            form.name = newData.name ?? "";
-            form.email = newData.email ?? "";
-            form.room = newData.room ?? "";
-            form.contact = newData.contact ?? "";
+const isViewMode = computed(() => props.mode === "View");
+const isFetching = computed(() => roomStore.isLoading);
+const isOccupied = computed(() => formData.status === 1);
+const isDisabled = computed(() => isViewMode.value || isFetching.value);
+
+const options = {
+    type: [
+        { label: "Single", value: "Single" },
+        { label: "Double", value: "Double" },
+        { label: "Studio", value: "Studio" },
+        { label: "Family", value: "Family" },
+    ],
+    status: [
+        { label: "Available", value: 0 },
+        { label: "Occupied", value: 1 },
+        { label: "Maintenance", value: 2 },
+    ],
+};
+
+watch(() => roomStore.viewData, (room) => {
+    if (props.mode === "View" || props.mode === "Edit") {
+        if (room) {
+            formData.room_number = room.room_number ?? "";
+            formData.type = room.type ?? "";
+            formData.capacity = room.capacity ?? "";
+            formData.price_per_month = room.price_per_month ?? "";
+            formData.occupied = room.occupied ?? 0;
+            formData.status = room.status ?? 0;
+            formData.created_at = dayjs(room.created_at).format("MMMM D, YYYY") ?? "";
+            formData.updated_at = dayjs(room.updated_at).format("MMMM D, YYYY") ?? "";
         }
-    },
-    { immediate: true }
-);
+    } else {
+        Object.keys(formData).forEach(k => formData[k] = "");
+        formData.occupied = 0;
+        formData.status = 0;
+    }
+}, { immediate: true });
 
-// read-only when viewing
-const isViewMode = computed(() => props.mode === "view");
-const submitForm = () => emit("submit", { ...form });
-const rooms = ref(['Single', 'Shared']);
-const status = ref(['Available', 'Full']);
-const test = ref('');
+const submitForm = async () => {
+    let success = false;
+
+    if (props.mode === "Edit") {
+        success = await roomStore.update(
+            roomStore.viewData.id,
+            { ...formData }
+        );
+    } else {
+        success = await roomStore.store({ ...formData });
+    }
+
+    if (success) {
+        emit('close');
+    }
+};
 </script>
+
 <template>
-    <form @submit.prevent="submitForm" class="space-y-5">
+    <div v-if="props.mode !== 'Add'" class="mb-3">
+        <span :class="`px-3 py-1 rounded-full font-semibold ${statusColorClass}`">
+            {{ formData.status }}
+        </span>
+    </div>
+
+    <form @submit.prevent="submitForm" class="space-y-5 flex flex-wrap justify-between">
         <BaseInput
-            label="Room No."
-            :disabled="isViewMode"
+            label="Room No. *"
+            v-model="formData.room_number"
+            :disabled="isDisabled"
             placeholder="Enter room no."
+            :error="roomStore.errors?.room_number?.[0]"
         />
         <BaseInput
-            label="Type"
-            v-model="test"
+            label="Type *"
+            v-model="formData.type"
             variant="select"
-            :options="rooms"
-            :disabled="isViewMode"
-            placeholder="Choose a room"
+            :options="options.type"
+            :disabled="isDisabled"
+            placeholder="Choose a room type"
+            :error="roomStore.errors?.type?.[0]"
         />
         <BaseInput
-            label="Capacity"
-            :disabled="isViewMode"
+            label="Capacity *"
+            v-model="formData.capacity"
+            :disabled="isDisabled || isOccupied"
             placeholder="Enter room capacity"
+            :error="roomStore.errors?.capacity?.[0]"
         />
         <BaseInput
-            label="Price / Month"
-            :disabled="isViewMode"
-            placeholder="Enter room price / month"
+            label="Price / Month *"
+            v-model="formData.price_per_month"
+            :disabled="isDisabled"
+            placeholder="Enter room price"
+            :error="roomStore.errors?.price_per_month?.[0]"
         />
         <BaseInput
             label="Occupied"
-            :disabled="isViewMode"
-            placeholder="Enter occupied"
+            v-model="formData.occupied"
+            :disabled="props.mode === 'Add' || isDisabled"
+            placeholder="Enter number of occupants"
         />
         <BaseInput
             label="Status"
-            v-model="test"
+            v-model="formData.status"
             variant="select"
-            :options="status"
-            :disabled="isViewMode"
+            :options="options.status"
+            :disabled="props.mode === 'Add'"
         />
-        <!-- Actions -->
-        <div v-if="!isViewMode" class="flex justify-end gap-2 pt-4">
-            <button
-                type="button"
-                class="px-4 py-2 rounded-lg border"
-                @click="$emit('cancel')"
-                >
-            Cancel
-            </button>
-            <button
+        <BaseInput
+            v-if="props.mode === 'View'"
+            label="Created at"
+            v-model="formData.created_at"
+            :disabled="props.mode === 'Add' || isDisabled"
+        />
+        <BaseInput
+            v-if="props.mode === 'View'"
+            label="Updated at"
+            v-model="formData.updated_at"
+            :disabled="props.mode === 'Add' || isDisabled"
+        />
+
+        <div v-if="props.mode !== 'View'" class="flex justify-end w-full gap-2 pt-4">
+            <BaseButton
+                variant="secondary"
+                size="sm"
+                :disabled="isFetching"
+                @click="emit('close')"
+            >
+                Cancel
+            </BaseButton>
+            <BaseButton
                 type="submit"
-                class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-                >
-            {{ props.mode === "edit" ? "Update" : "Save" }}
-            </button>
+                size="sm"
+                :loading="isFetching"
+                :disabled="isFetching"
+            >
+                {{ isFetching ? 'Saving...' : props.mode }}
+            </BaseButton>
         </div>
     </form>
 </template>

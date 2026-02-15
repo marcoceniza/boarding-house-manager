@@ -25,7 +25,7 @@ const inputClasses = computed(() => [
 </script>
 
 <template>
-    <div class="flex flex-col w-full gap-1">
+    <div class="flex flex-col w-[48%] gap-1">
         <!-- LABEL -->
         <label
             v-if="label && variant !== 'checkbox'"
@@ -68,9 +68,9 @@ const inputClasses = computed(() => [
             <option
                 v-for="(option, idx) in options"
                 :key="idx"
-                :value="option"
+                :value="option.value"
             >
-                {{ option }}
+                {{ option.label }}
             </option>
         </select>
 

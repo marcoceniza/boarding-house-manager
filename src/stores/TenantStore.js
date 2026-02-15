@@ -1,66 +1,48 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import api from '@/lib/axios';
-import { useToastStore } from './toastStore';
 
-export const useRoomStore = defineStore('room', () => {
-  const rooms = ref([]);
+export const useTenantStore = defineStore('tenant', () => {
+  const tenants = ref([]);
   const viewData = ref(null);
   const isLoading = ref(false);
-  const isRoomLoading = ref(false);
-  const toastStore = useToastStore();
-  const errors = ref({});
 
   /* =======================
-    Fetch all rooms
+    Fetch all tenants
   ======================= */
   const index = async () => {
     try {
       isLoading.value = true;
-      isRoomLoading.value = true;
-      const res = await api.get('/api/rooms');
-      rooms.value = res.data.result;
+      const res = await api.get('/api/tenants');
+      tenants.value = res.data.result;
+
+      console.log(tenants.value);
     } catch (error) {
       console.error(error);
     } finally {
       isLoading.value = false;
-      isRoomLoading.value = false;
     }
   }
 
   /* =======================
-    Create room
+    Create tenant
   ======================= */
   const store = async (data) => {
     try {
-      isLoading.value = true;
-
-      const res = await api.post('/api/rooms', data);
-      rooms.value.unshift(res.data.result);
-      toastStore.success(res.data.message);
-
-      return true;
+      const res = await api.post('/api/tenants', data);
+      tenants.value.unshift(res.data.result); // optional instant UI update
     } catch (error) {
-
-      if (error.response?.status === 422) {
-          errors.value = error.response.data.errors;
-      } else {
-          toastStore.error("Something went wrong");
-      }
-
-      return false;
-    } finally {
-      isLoading.value = false;
+      console.error(error);
     }
   }
 
   /* =======================
-    View single room
+    View single tenant
   ======================= */
   const show = async (id) => {
     try {
       isLoading.value = true;
-      const res = await api.get(`/api/rooms/${id}`);
+      const res = await api.get(`/api/tenants/${id}`);
       viewData.value = res.data.result;
     } catch (error) {
       console.error(error);
@@ -70,16 +52,16 @@ export const useRoomStore = defineStore('room', () => {
   }
 
   /* =======================
-    Update room
+    Update tenant
   ======================= */
   const update = async (id, data) => {
     try {
-      const res = await api.put(`/api/rooms/${id}`, data);
+      const res = await api.put(`/api/tenants/${id}`, data);
 
       // sync local list
-      const index = rooms.value.findIndex(r => r.id === id);
+      const index = tenants.value.findIndex(r => r.id === id);
       if (index !== -1) {
-        rooms.value[index] = res.data.result;
+        tenants.value[index] = res.data.result;
       }
 
       viewData.value = res.data.result;
@@ -87,6 +69,19 @@ export const useRoomStore = defineStore('room', () => {
       console.error(error);
     }
   }
+
+  /* =======================
+    End tenancy
+  ======================= */
+  const endTenancy = async (id) => {
+    try {
+        await api.post(`/api/tenants/${id}/end-tenancy`);
+        await index(); // refresh tenants
+        await roomStore.index(); // refresh rooms
+      } catch (error) {
+        console.error(error);
+      }
+  };
 
   /* =======================
     Clear modal state
@@ -95,10 +90,11 @@ export const useRoomStore = defineStore('room', () => {
     viewData.value = null;
   }
 
-  index();
+  // auto fetch
+  index()
 
   return {
-    rooms,
+    tenants,
     viewData,
     isLoading,
     index,
@@ -106,7 +102,6 @@ export const useRoomStore = defineStore('room', () => {
     show,
     update,
     clearViewData,
-    isRoomLoading,
-    errors
+    endTenancy
   }
 })

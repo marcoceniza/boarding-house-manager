@@ -3,65 +3,58 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Queue\SerializesModels;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Billing;
+use Illuminate\Support\Str;
 
 class InvoiceMail extends Mailable
 {
     use Queueable, SerializesModels;
+
     public $billing;
 
-    /**
-     * Create a new message instance.
-     */
-    public function __construct($billing)
+    public function __construct(Billing $billing)
     {
         $this->billing = $billing;
     }
 
-    /**
-     * Get the message envelope.
-     */
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your Monthly Invoice',
+            subject: 'Your Monthly Invoice'
         );
     }
 
-    /**
-     * Get the message content definition.
-     */
     public function content(): Content
     {
         return new Content(
             view: 'emails.invoice',
+            with: [
+                'billing' => $this->billing,
+            ]
         );
     }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
     public function attachments(): array
     {
         return [
             Attachment::fromData(
                 fn () => Pdf::loadView('pdf.invoice', [
-                    'boardingHouse' => 'My Boarding House',
-                    'tenantName'    => $this->billing->tenant->name,
-                    'room'          => $this->billing->room->name,
-                    'period'        => $this->billing->period,
-                    'dueDate'       => $this->billing->due_date->format('M d, Y'),
-                    'total'         => $this->billing->room->rate,
+                    'tenantName' => $this->billing->tenant->first_name . ' ' . $this->billing->tenant->last_name,
+                    'period'     => $this->billing->billing_period->format('F Y'),
+                    'dueDate'    => $this->billing->due_date->format('F d, Y'),
+                    'total'      => $this->billing->amount,
                 ])->output(),
-                'invoice.pdf'
+                // Generate filename dynamically
+                Str::slug($this->billing->tenant->first_name . ' ' . $this->billing->tenant->last_name)
+                . '-' 
+                . $this->billing->billing_period->format('Y-n') // e.g., 2026-2
+                . '-invoice.pdf'
             )->withMime('application/pdf'),
         ];
     }
