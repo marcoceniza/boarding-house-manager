@@ -1,17 +1,23 @@
 <script setup>
 import { computed } from "vue";
+import { useRoute } from "vue-router";
 
 const model = defineModel();
+const route = useRoute();
+
+const isAuthPage = computed(() =>
+    ['/login', '/register'].includes(route.path)
+);
 
 const props = defineProps({
-    variant:{ type: String, default: "input" }, // input | textarea | select | checkbox | radio
+    variant:{ type: String, default: "input" },
     type: { type:  String, default: "text" },
     placeholder: { type: String, default: "" },
     disabled: { type: Boolean, default: false },
     rows: { type: Number, default: 3 },
     label: { type: String, default: "" },
     error: { type: String, default: "" },
-    options: { type: Array, default: () => [] } // [{ label: 'Room 1', value: 1 }]
+    options: { type: Array, default: () => [] }
 });
 
 const inputClasses = computed(() => [
@@ -25,8 +31,7 @@ const inputClasses = computed(() => [
 </script>
 
 <template>
-    <div class="flex flex-col w-[48%] gap-1">
-        <!-- LABEL -->
+    <div class="flex flex-col gap-1" :class="{ 'w-[48%]': !isAuthPage }">
         <label
             v-if="label && variant !== 'checkbox'"
             class="text-sm font-semibold text-gray-600"
@@ -34,7 +39,6 @@ const inputClasses = computed(() => [
             {{ label }}
         </label>
 
-        <!-- INPUT -->
         <input
             v-if="variant === 'input'"
             v-model="model"
@@ -44,7 +48,6 @@ const inputClasses = computed(() => [
             :class="inputClasses"
         />
 
-        <!-- TEXTAREA -->
         <textarea
             v-else-if="variant === 'textarea'"
             v-model="model"
@@ -54,7 +57,6 @@ const inputClasses = computed(() => [
             :class="[inputClasses, 'resize-y']"
         />
 
-        <!-- SELECT -->
         <select
             v-else-if="variant === 'select'"
             v-model="model"
@@ -74,7 +76,6 @@ const inputClasses = computed(() => [
             </option>
         </select>
 
-        <!-- CHECKBOX -->
         <label
             v-else-if="variant === 'checkbox'"
             class="flex items-center gap-2 text-sm text-gray-700"
@@ -88,7 +89,6 @@ const inputClasses = computed(() => [
             {{ label || placeholder }}
         </label>
 
-        <!-- RADIO -->
         <div v-else-if="variant === 'radio'" class="flex flex-col gap-2">
             <label
                 v-for="option in options"
@@ -106,7 +106,6 @@ const inputClasses = computed(() => [
             </label>
         </div>
 
-        <!-- ERROR -->
         <p v-if="error" class="text-sm text-red-500">
             {{ error }}
         </p>

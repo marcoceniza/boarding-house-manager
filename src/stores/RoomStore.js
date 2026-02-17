@@ -74,6 +74,8 @@ export const useRoomStore = defineStore('room', () => {
   ======================= */
   const update = async (id, data) => {
     try {
+      isLoading.value = true;
+
       const res = await api.put(`/api/rooms/${id}`, data);
 
       // sync local list
@@ -83,8 +85,20 @@ export const useRoomStore = defineStore('room', () => {
       }
 
       viewData.value = res.data.result;
+      toastStore.success(res.data.message);
+
+      return true;
     } catch (error) {
-      console.error(error);
+
+      if (error.response?.status === 422) {
+          errors.value = error.response.data.errors;
+      } else {
+          toastStore.error("Something went wrong");
+      }
+
+      return false;
+    } finally {
+      isLoading.value = false;
     }
   }
 
@@ -93,6 +107,13 @@ export const useRoomStore = defineStore('room', () => {
   ======================= */
   const clearViewData = () => {
     viewData.value = null;
+  }
+
+  /* =======================
+    Clear errors state
+  ======================= */
+  const clearErrors = () => {
+    errors.value = {}
   }
 
   index();
@@ -107,6 +128,7 @@ export const useRoomStore = defineStore('room', () => {
     update,
     clearViewData,
     isRoomLoading,
-    errors
+    errors,
+    clearErrors
   }
 })

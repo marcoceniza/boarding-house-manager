@@ -13,7 +13,7 @@ class RoomController extends Controller
      */
     public function index()
     {
-        $rooms = Room::with('tenants')->get();
+        $rooms = Room::with('tenants')->orderBy('created_at', 'desc')->get();
 
         return response()->json([
             'success' => true,

@@ -1,4 +1,8 @@
 <script setup>
+import { useRoomStore } from '@/stores/RoomStore';
+
+const roomStore = useRoomStore();
+
 const props = defineProps({
     isOpen: { type: Boolean, required: true },
     title: { type: String, default: "Modal Title" },
@@ -8,7 +12,10 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["update:isOpen"]);
-const close = () => emit("update:isOpen", false);
+const close = () => {
+    roomStore.clearErrors();
+    emit("update:isOpen", false);
+}
 </script>
 
 <template>

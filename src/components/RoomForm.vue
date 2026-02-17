@@ -20,6 +20,7 @@ const formData = reactive({
 });
 
 const isViewMode = computed(() => props.mode === "View");
+const isEditMode = computed(() => props.mode === "Edit");
 const isFetching = computed(() => roomStore.isLoading);
 const isOccupied = computed(() => formData.status === 1);
 const isDisabled = computed(() => isViewMode.value || isFetching.value);
@@ -32,9 +33,9 @@ const options = {
         { label: "Family", value: "Family" },
     ],
     status: [
-        { label: "Available", value: 0 },
-        { label: "Occupied", value: 1 },
-        { label: "Maintenance", value: 2 },
+        { label: "Available", value: isViewMode.value || isEditMode.value ? "Available" : 0 },
+        { label: "Occupied", value: isViewMode.value || isEditMode.value ? "Occupied" : 1 },
+        { label: "Maintenance", value: isViewMode.value || isEditMode.value ? "Maintenance" : 2 },
     ],
 };
 
@@ -47,8 +48,8 @@ watch(() => roomStore.viewData, (room) => {
             formData.price_per_month = room.price_per_month ?? "";
             formData.occupied = room.occupied ?? 0;
             formData.status = room.status ?? 0;
-            formData.created_at = dayjs(room.created_at).format("MMMM D, YYYY") ?? "";
-            formData.updated_at = dayjs(room.updated_at).format("MMMM D, YYYY") ?? "";
+            formData.created_at = dayjs(room.created_at).format("MMM D, YYYY • h:mm A") ?? "";
+            formData.updated_at = dayjs(room.updated_at).format("MMM D, YYYY • h:mm A") ?? "";
         }
     } else {
         Object.keys(formData).forEach(k => formData[k] = "");
@@ -114,17 +115,21 @@ const submitForm = async () => {
             :error="roomStore.errors?.price_per_month?.[0]"
         />
         <BaseInput
-            label="Occupied"
+            label="Occupied *"
             v-model="formData.occupied"
-            :disabled="props.mode === 'Add' || isDisabled"
+            :disabled="
+                props.mode === 'Add' ||
+                props.mode === 'Edit' ||
+                isDisabled
+            "
             placeholder="Enter number of occupants"
         />
         <BaseInput
-            label="Status"
+            label="Status *"
             v-model="formData.status"
             variant="select"
             :options="options.status"
-            :disabled="props.mode === 'Add'"
+            :disabled="props.mode === 'Add' || isDisabled"
         />
         <BaseInput
             v-if="props.mode === 'View'"
@@ -144,7 +149,7 @@ const submitForm = async () => {
                 variant="secondary"
                 size="sm"
                 :disabled="isFetching"
-                @click="emit('close')"
+                @click="emit('close'); roomStore.clearErrors()"
             >
                 Cancel
             </BaseButton>

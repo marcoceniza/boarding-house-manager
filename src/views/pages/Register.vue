@@ -32,12 +32,14 @@ const formData = reactive({
                     label="Name"
                     v-model="formData.name"
                     placeholder="Name"
+                    :error="authStore.registerErrors?.name?.[0]"
                 />
                 <BaseInput
                     type="email"
                     label="Email"
                     v-model="formData.email"
                     placeholder="you@example.com"
+                    :error="authStore.registerErrors?.email?.[0]"
                 />
                 <div class="relative">
                     <BaseInput
@@ -45,11 +47,13 @@ const formData = reactive({
                         label="Password"
                         v-model="formData.password"
                         placeholder="••••••••"
+                        :error="authStore.registerErrors?.password?.[0]"
                     />
 
                     <component
                         :is="showPassword ? EyeSlashIcon : EyeIcon"
-                        class="size-5 text-gray-500 absolute right-3 bottom-3 cursor-pointer hover:text-gray-700 transition-colors duration-150"
+                        class="size-5 text-gray-500 absolute right-3 cursor-pointer hover:text-gray-700 transition-colors duration-150"
+                        :class="authStore.registerErrors?.password?.[0] ? 'bottom-9.25' : 'bottom-3'"
                         @click="showPassword = !showPassword"
                     />
                 </div>
@@ -59,6 +63,7 @@ const formData = reactive({
                         label="Confirm Password"
                         v-model="formData.password_confirmation"
                         placeholder="••••••••"
+                        :error="authStore.registerErrors?.password_confirmation?.[0]"
                     />
 
                     <component
@@ -67,7 +72,14 @@ const formData = reactive({
                         @click="showConfirmPassword = !showConfirmPassword"
                     />
                 </div>
-                <BaseButton type="submit" rounded fullWidth>CREATE ACCOUNT</BaseButton>
+                <BaseButton
+                    type="submit"
+                    rounded 
+                    fullWidth
+                    :disabled="authStore.isLoading"
+                >
+                    {{ authStore.isLoading ? 'Creating account...' : 'CREATE ACCOUNT' }}
+                </BaseButton>
             </form>
             <p class="text-center text-sm text-gray-600 mt-6">
                 Already have an account?
