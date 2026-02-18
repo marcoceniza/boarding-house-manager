@@ -21,7 +21,7 @@ export const useAuthStore = defineStore('auth', () => {
 
       if(url === 'login') {
         router.push('/dashboard');
-        localStorage.setItem('token', res.data.access_token);
+        localStorage.setItem('token', res.data.token);
       }else {
         router.push('/login');
       }
@@ -35,7 +35,9 @@ export const useAuthStore = defineStore('auth', () => {
         if (url === 'register') registerErrors.value = error.response.data.errors;
       }
 
-      toastStore.error(error.response.data.message);
+      if (error.response?.status === 401) {
+        toastStore.error(error.response.data.message);
+      }
 
       return false;
     }finally {

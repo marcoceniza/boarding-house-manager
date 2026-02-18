@@ -31,7 +31,7 @@ const inputClasses = computed(() => [
 </script>
 
 <template>
-    <div class="flex flex-col gap-1" :class="{ 'w-[48%]': !isAuthPage }">
+    <div class="flex flex-col gap-1 w-full" :class="{ 'md:w-[48%]': !isAuthPage }">
         <label
             v-if="label && variant !== 'checkbox'"
             class="text-sm font-semibold text-gray-600"

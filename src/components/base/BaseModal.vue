@@ -27,7 +27,7 @@ const close = () => {
         >
             <transition name="scale">
                 <div
-                    class="bg-white rounded-2xl shadow-lg max-w-lg w-full p-6 relative"
+                    class="bg-white m-5 rounded-2xl shadow-lg max-w-lg w-full max-h-[90vh] flex flex-col p-6 relative"
                     @keydown.escape.window="close"
                 >
                     <!-- Modal Header -->
@@ -45,7 +45,7 @@ const close = () => {
                     </div>
 
                     <!-- Modal Body -->
-                    <div>
+                    <div class="flex-1 overflow-y-auto pr-3">
                         <slot></slot>
                     </div>
 
