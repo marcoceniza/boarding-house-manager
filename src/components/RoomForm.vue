@@ -21,7 +21,7 @@ const formData = reactive({
 
 const isViewMode = computed(() => props.mode === "View");
 const isEditMode = computed(() => props.mode === "Edit");
-const isFetching = computed(() => roomStore.isLoading);
+const isFetching = computed(() => roomStore.isFormLoading);
 const isOccupied = computed(() => formData.status === 1);
 const isDisabled = computed(() => isViewMode.value || isFetching.value);
 
@@ -39,20 +39,55 @@ const options = {
     ],
 };
 
+const statusColorClass = computed(() => {
+    switch (formData.status) {
+        case 'Available':
+            return 'bg-green-100 text-green-800'
+        case 'Occupied':
+            return 'bg-red-100 text-red-800'
+        case 'Maintenance':
+            return 'bg-yellow-100 text-yellow-800'
+        default:
+            return ''
+    }
+});
+
+watch(() => formData.price_per_month, (newVal) => {
+    if (!newVal) return;
+    let numeric = newVal.toString().replace(/,/g, '').replace(/\D/g, '');
+
+    if (numeric.length > 3) {
+        numeric = numeric.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+
+    formData.price_per_month = numeric;
+}, { immediate: true });
+
 watch(() => roomStore.viewData, (room) => {
     if (props.mode === "View" || props.mode === "Edit") {
         if (room) {
             formData.room_number = room.room_number ?? "";
             formData.type = room.type ?? "";
             formData.capacity = room.capacity ?? "";
-            formData.price_per_month = room.price_per_month ?? "";
+
+            let price = room.price_per_month ?? "";
+            if (price) {
+                const numeric = price.toString().replace(/\D/g, '');
+                formData.price_per_month =
+                    numeric.length > 3
+                    ? numeric.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                    : numeric;
+            } else {
+                formData.price_per_month = "";
+            }
+
             formData.occupied = room.occupied ?? 0;
             formData.status = room.status ?? 0;
             formData.created_at = dayjs(room.created_at).format("MMM D, YYYY • h:mm A") ?? "";
             formData.updated_at = dayjs(room.updated_at).format("MMM D, YYYY • h:mm A") ?? "";
         }
     } else {
-        Object.keys(formData).forEach(k => formData[k] = "");
+        Object.keys(formData).forEach((k) => (formData[k] = ""));
         formData.occupied = 0;
         formData.status = 0;
     }
@@ -72,12 +107,13 @@ const submitForm = async () => {
 
     if (success) {
         emit('close');
+        roomStore.errors = {};
     }
 };
 </script>
 
 <template>
-    <div v-if="props.mode !== 'Add'" class="mb-3">
+    <div v-if="props.mode !== 'Add'" class="mb-4 text-center">
         <span :class="`px-3 py-1 rounded-full font-semibold ${statusColorClass}`">
             {{ formData.status }}
         </span>
@@ -129,7 +165,11 @@ const submitForm = async () => {
             v-model="formData.status"
             variant="select"
             :options="options.status"
-            :disabled="props.mode === 'Add' || isDisabled"
+            :disabled="
+                props.mode === 'Add' ||
+                props.mode === 'Edit' ||
+                isDisabled
+            "
         />
         <BaseInput
             v-if="props.mode === 'View'"

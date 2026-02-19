@@ -19,20 +19,20 @@ const close = () => {
 </script>
 
 <template>
-    <transition name="fade">
+    <Transition name="fade">
         <div
             v-if="props.isOpen"
             class="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
             @click.self="close"
         >
-            <transition name="scale">
+            <Transition name="scale">
                 <div
                     class="bg-white m-5 rounded-2xl shadow-lg max-w-lg w-full max-h-[90vh] flex flex-col p-6 relative"
                     @keydown.escape.window="close"
                 >
                     <!-- Modal Header -->
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-semibold flex items-center gap-2">
+                        <h3 class="text-2xl font-semibold flex items-center gap-2">
                             {{ props.title }}
                             <span
                                 v-if="props.titleBadge"
@@ -54,9 +54,9 @@ const close = () => {
                         <slot name="footer"></slot>
                     </div>
                 </div>
-            </transition>
+            </Transition>
         </div>
-    </transition>
+    </Transition>
 </template>
 
 <style scoped>

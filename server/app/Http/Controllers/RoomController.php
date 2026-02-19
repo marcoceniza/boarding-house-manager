@@ -19,7 +19,7 @@ class RoomController extends Controller
             'success' => true,
             'message' => 'Rooms fetched successfully',
             'result'  => $rooms
-        ]);
+        ], 200);
     }
 
     /**
@@ -31,7 +31,7 @@ class RoomController extends Controller
             'room_number'     => 'required|string|max:10|unique:rooms,room_number',
             'type'            => 'required|string|max:50',
             'capacity'        => 'required|integer|min:1',
-            'price_per_month' => 'required|numeric|min:0',
+            'price_per_month' => 'required|string|min:0',
         ]);
 
         // New rooms always start empty
@@ -44,7 +44,7 @@ class RoomController extends Controller
             'success' => true,
             'message' => 'Room created successfully',
             'result'  => $room
-        ]);
+        ], 200);
     }
 
     /**
@@ -58,7 +58,7 @@ class RoomController extends Controller
             'success' => true,
             'message' => 'Room details fetched successfully',
             'result'  => $room
-        ]);
+        ], 200);
     }
 
     /**
@@ -72,7 +72,7 @@ class RoomController extends Controller
             'room_number'     => 'required|string|max:10|unique:rooms,room_number,' . $room->id,
             'type'            => 'required|string|max:50',
             'capacity'        => 'required|integer|min:1',
-            'price_per_month' => 'required|numeric|min:0',
+            'price_per_month' => 'required|string|min:0',
             'status'          => 'nullable|in:Available,Occupied,Maintenance',
         ]);
 
@@ -96,7 +96,7 @@ class RoomController extends Controller
             'success' => true,
             'message' => 'Room updated successfully',
             'result'  => $room
-        ]);
+        ], 200);
     }
 
     /**
@@ -119,6 +119,6 @@ class RoomController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Room deleted successfully',
-        ]);
+        ], 200);
     }
 }

@@ -22,7 +22,7 @@ const props = defineProps({
 
 const inputClasses = computed(() => [
     "border rounded px-4 py-3 w-full text-base leading-tight",
-    "focus:outline-none focus:ring-2 focus:ring-offset-1 transition",
+    "focus:outline-none focus:ring-2 focus:ring-inset transition",
     props.disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white",
     props.error
         ? "border-red-500 focus:ring-red-500"

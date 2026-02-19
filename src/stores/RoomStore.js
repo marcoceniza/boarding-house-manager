@@ -6,25 +6,29 @@ import { useToastStore } from './toastStore';
 export const useRoomStore = defineStore('room', () => {
   const rooms = ref([]);
   const viewData = ref(null);
-  const isLoading = ref(false);
-  const isRoomLoading = ref(false);
+  const isListLoading = ref(false);
+  const isFormLoading = ref(false);
+  const isViewLoading = ref(false);
+  const isDeleteLoading = ref(false);
   const toastStore = useToastStore();
   const errors = ref({});
+  const isOpenModal = ref(false);
+  const isOpenDeleteModal = ref(false);
+  const currentMode = ref("Add");
+  const selectedRoom = ref(null);
 
   /* =======================
     Fetch all rooms
   ======================= */
   const index = async () => {
     try {
-      isLoading.value = true;
-      isRoomLoading.value = true;
+      isListLoading.value = true;
       const res = await api.get('/api/rooms');
       rooms.value = res.data.result;
     } catch (error) {
       console.error(error);
     } finally {
-      isLoading.value = false;
-      isRoomLoading.value = false;
+      isListLoading.value = false;
     }
   }
 
@@ -33,7 +37,7 @@ export const useRoomStore = defineStore('room', () => {
   ======================= */
   const store = async (data) => {
     try {
-      isLoading.value = true;
+      isFormLoading.value = true;
 
       const res = await api.post('/api/rooms', data);
       rooms.value.unshift(res.data.result);
@@ -50,7 +54,7 @@ export const useRoomStore = defineStore('room', () => {
 
       return false;
     } finally {
-      isLoading.value = false;
+      isFormLoading.value = false;
     }
   }
 
@@ -59,13 +63,13 @@ export const useRoomStore = defineStore('room', () => {
   ======================= */
   const show = async (id) => {
     try {
-      isLoading.value = true;
+      isViewLoading.value = true;
       const res = await api.get(`/api/rooms/${id}`);
       viewData.value = res.data.result;
     } catch (error) {
       console.error(error);
     } finally {
-      isLoading.value = false;
+      isViewLoading.value = false;
     }
   }
 
@@ -74,7 +78,7 @@ export const useRoomStore = defineStore('room', () => {
   ======================= */
   const update = async (id, data) => {
     try {
-      isLoading.value = true;
+      isFormLoading.value = true;
 
       const res = await api.put(`/api/rooms/${id}`, data);
 
@@ -98,7 +102,23 @@ export const useRoomStore = defineStore('room', () => {
 
       return false;
     } finally {
-      isLoading.value = false;
+      isFormLoading.value = false;
+    }
+  }
+
+  /* =======================
+    View single room
+  ======================= */
+  const destroy = async (id) => {
+    try {
+      isDeleteLoading.value = true;
+      const res = await api.delete(`/api/rooms/${id}`);
+      toastStore.success(res.data.message);
+      rooms.value = rooms.value.filter(r => r.id !== id);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      isDeleteLoading.value = false;
     }
   }
 
@@ -121,14 +141,21 @@ export const useRoomStore = defineStore('room', () => {
   return {
     rooms,
     viewData,
-    isLoading,
     index,
     store,
     show,
     update,
     clearViewData,
-    isRoomLoading,
     errors,
-    clearErrors
+    clearErrors,
+    isOpenModal,
+    currentMode,
+    selectedRoom,
+    isListLoading,
+    isViewLoading,
+    isFormLoading,
+    destroy,
+    isOpenDeleteModal,
+    isDeleteLoading
   }
 })

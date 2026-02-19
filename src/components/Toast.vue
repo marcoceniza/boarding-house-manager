@@ -5,7 +5,7 @@ const toastStore = useToastStore();
 </script>
 
 <template>
-    <transition-group
+    <TransitionGroup
         name="toast"
         tag="div"
         class="fixed top-5 right-5 z-50 flex flex-col gap-3"
@@ -14,7 +14,7 @@ const toastStore = useToastStore();
             v-for="toast in toastStore.toasts"
             :key="toast.id"
             :class="[
-                'min-w-[250px] px-4 py-3 rounded shadow-lg text-white flex justify-between items-center transition-all duration-300',
+                'min-w-28 px-4 py-3 rounded shadow-lg text-white flex justify-between items-center transition-all duration-300',
                 toast.type === 'success' ? 'bg-green-500' :
                 toast.type === 'error' ? 'bg-red-500' :
                 toast.type === 'warning' ? 'bg-yellow-500 text-black' :
@@ -22,9 +22,9 @@ const toastStore = useToastStore();
             ]"
         >
         <span>{{ toast.message }}</span>
-        <button @click="toastStore.removeToast(toast.id)" class="ml-2 font-bold">&times;</button>
+        <!-- <button @click="toastStore.removeToast(toast.id)" class="ml-2 font-bold">&times;</button> -->
         </div>
-    </transition-group>
+    </TransitionGroup>
 </template>
 
 <style scoped>
