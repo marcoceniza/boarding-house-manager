@@ -45,7 +45,7 @@ const close = () => {
                     </div>
 
                     <!-- Modal Body -->
-                    <div class="flex-1 overflow-y-auto pr-3">
+                    <div class="flex-1 overflow-y-auto py-3 pr-3">
                         <slot></slot>
                     </div>
 

@@ -35,8 +35,9 @@ class RoomController extends Controller
         ]);
 
         // New rooms always start empty
+        // Status => 0 = Available, 1 = Occupied, 2 = Maintenance
         $validated['occupied'] = 0;
-        $validated['status']   = 'Available';
+        $validated['status']   = 0;
 
         $room = Room::create($validated);
 
@@ -68,12 +69,13 @@ class RoomController extends Controller
     {
         $room = Room::findOrFail($id);
 
+        // Status => 0 = Available, 1 = Occupied, 2 = Maintenance
         $validated = $request->validate([
             'room_number'     => 'required|string|max:10|unique:rooms,room_number,' . $room->id,
             'type'            => 'required|string|max:50',
             'capacity'        => 'required|integer|min:1',
             'price_per_month' => 'required|string|min:0',
-            'status'          => 'nullable|in:Available,Occupied,Maintenance',
+            'status'          => 'nullable|integer|in:0,1,2', 
         ]);
 
         // ❗ Prevent shrinking capacity below current occupancy
@@ -84,10 +86,8 @@ class RoomController extends Controller
         }
 
         // Auto-calculate status unless manually set to Maintenance
-        if (($validated['status'] ?? null) !== 'Maintenance') {
-            $validated['status'] = $room->occupied >= $validated['capacity']
-                ? 'Occupied'
-                : 'Available';
+        if (($validated['status'] ?? null) !== 2) {
+            $validated['status'] = $room->occupied >= $validated['capacity'] ? 1 : 0;
         }
 
         $room->update($validated);

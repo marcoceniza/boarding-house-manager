@@ -63,8 +63,8 @@ const inputClasses = computed(() => [
             :disabled="disabled"
             :class="inputClasses"
         >
-            <option value="" disabled>
-                {{ placeholder || "Select an option" }}
+            <option :value="null" disabled>
+                {{ placeholder || "Please select an option" }}
             </option>
 
             <option

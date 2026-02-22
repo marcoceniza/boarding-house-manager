@@ -8,7 +8,7 @@ import { useRoomStore } from "@/stores/RoomStore";
 const roomStore = useRoomStore();
 
 const emit = defineEmits(["close"]);
-const props = defineProps({ mode: { type: String, default: "Add" } });
+const props = defineProps({ mode: { type: String, default: "Create" } });
 
 const formData = reactive({
     room_number: "",
@@ -19,11 +19,9 @@ const formData = reactive({
     status: 0,
 });
 
-const isViewMode = computed(() => props.mode === "View");
-const isEditMode = computed(() => props.mode === "Edit");
 const isFetching = computed(() => roomStore.isFormLoading);
 const isOccupied = computed(() => formData.status === 1);
-const isDisabled = computed(() => isViewMode.value || isFetching.value);
+const isDisabled = computed(() => props.mode === "View" || isFetching.value);
 
 const options = {
     type: [
@@ -33,24 +31,11 @@ const options = {
         { label: "Family", value: "Family" },
     ],
     status: [
-        { label: "Available", value: isViewMode.value || isEditMode.value ? "Available" : 0 },
-        { label: "Occupied", value: isViewMode.value || isEditMode.value ? "Occupied" : 1 },
-        { label: "Maintenance", value: isViewMode.value || isEditMode.value ? "Maintenance" : 2 },
+        { label: "Available", value:  0 },
+        { label: "Occupied", value: 1 },
+        { label: "Maintenance", value: 2 },
     ],
 };
-
-const statusColorClass = computed(() => {
-    switch (formData.status) {
-        case 'Available':
-            return 'bg-green-100 text-green-800'
-        case 'Occupied':
-            return 'bg-red-100 text-red-800'
-        case 'Maintenance':
-            return 'bg-yellow-100 text-yellow-800'
-        default:
-            return ''
-    }
-});
 
 watch(() => formData.price_per_month, (newVal) => {
     if (!newVal) return;
@@ -64,10 +49,10 @@ watch(() => formData.price_per_month, (newVal) => {
 }, { immediate: true });
 
 watch(() => roomStore.viewData, (room) => {
-    if (props.mode === "View" || props.mode === "Edit") {
+    if (props.mode === "View" || props.mode === "Update") {
         if (room) {
             formData.room_number = room.room_number ?? "";
-            formData.type = room.type ?? "";
+            formData.type = room.type ?? null;
             formData.capacity = room.capacity ?? "";
 
             let price = room.price_per_month ?? "";
@@ -90,13 +75,14 @@ watch(() => roomStore.viewData, (room) => {
         Object.keys(formData).forEach((k) => (formData[k] = ""));
         formData.occupied = 0;
         formData.status = 0;
+        formData.type = null;
     }
 }, { immediate: true });
 
 const submitForm = async () => {
     let success = false;
 
-    if (props.mode === "Edit") {
+    if (props.mode === "Update") {
         success = await roomStore.update(
             roomStore.viewData.id,
             { ...formData }
@@ -113,12 +99,6 @@ const submitForm = async () => {
 </script>
 
 <template>
-    <div v-if="props.mode !== 'Add'" class="mb-4 text-center">
-        <span :class="`px-3 py-1 rounded-full font-semibold ${statusColorClass}`">
-            {{ formData.status }}
-        </span>
-    </div>
-
     <form @submit.prevent="submitForm" class="space-y-5 flex flex-wrap justify-between">
         <BaseInput
             label="Room No. *"
@@ -154,8 +134,8 @@ const submitForm = async () => {
             label="Occupied *"
             v-model="formData.occupied"
             :disabled="
-                props.mode === 'Add' ||
-                props.mode === 'Edit' ||
+                props.mode === 'Create' ||
+                props.mode === 'Update' ||
                 isDisabled
             "
             placeholder="Enter number of occupants"
@@ -166,8 +146,8 @@ const submitForm = async () => {
             variant="select"
             :options="options.status"
             :disabled="
-                props.mode === 'Add' ||
-                props.mode === 'Edit' ||
+                props.mode === 'Create' ||
+                props.mode === 'Update' ||
                 isDisabled
             "
         />
@@ -175,13 +155,13 @@ const submitForm = async () => {
             v-if="props.mode === 'View'"
             label="Created at"
             v-model="formData.created_at"
-            :disabled="props.mode === 'Add' || isDisabled"
+            :disabled="props.mode === 'Create' || isDisabled"
         />
         <BaseInput
             v-if="props.mode === 'View'"
             label="Updated at"
             v-model="formData.updated_at"
-            :disabled="props.mode === 'Add' || isDisabled"
+            :disabled="props.mode === 'Create' || isDisabled"
         />
 
         <div v-if="props.mode !== 'View'" class="flex justify-end w-full gap-2 pt-4">
@@ -199,7 +179,12 @@ const submitForm = async () => {
                 :loading="isFetching"
                 :disabled="isFetching"
             >
-                {{ isFetching ? 'Saving...' : props.mode }}
+                <span v-if="isFetching">
+                    {{ props.mode === 'Create' ? 'Creating...' : 'Updating...' }}
+                </span>
+                <span v-else>
+                    {{ props.mode }}
+                </span>
             </BaseButton>
         </div>
     </form>

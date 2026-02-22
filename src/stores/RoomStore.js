@@ -107,7 +107,7 @@ export const useRoomStore = defineStore('room', () => {
   }
 
   /* =======================
-    View single room
+    Delete room
   ======================= */
   const destroy = async (id) => {
     try {

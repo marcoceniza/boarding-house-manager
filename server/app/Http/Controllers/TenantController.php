@@ -20,7 +20,7 @@ class TenantController extends Controller
             'success' => true,
             'message' => 'Tenants fetched successfully',
             'result' => $tenants
-        ]);
+        ], 200);
     }
 
     /**
@@ -28,37 +28,41 @@ class TenantController extends Controller
      */
     public function store(Request $request)
     {
+        // Status => 0 = Inactive, 1 = Active, 2 = Left
         $validated = $request->validate([
             'first_name'    => 'required|string|max:50',
             'last_name'     => 'required|string|max:50',
             'email'         => 'required|email|unique:tenants,email',
             'room_id'       => 'required|exists:rooms,id',
-            'move_in_date'  => 'required|date',
-            'status'        => 'nullable|string|in:Active,Left,Inactive',
+            'move_in_date'  => 'required|date|after_or_equal:today',
+            'occupied'     => 'required|integer|min:1',
+            'status'        => 'nullable|integer|in:0,1,2',
+        ], [
+            'move_in_date.after_or_equal' => 'Move-in date cannot be earlier than today.'
         ]);
 
-        DB::transaction(function () use ($validated, &$tenant) {
+        $tenant = DB::transaction(function () use ($validated) {
 
-            // ✅ Ensure room is AVAILABLE
             $room = Room::where('id', $validated['room_id'])
-                ->where('status', 'Available')
+                ->where('status', 0)
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            // Create tenant
             $tenant = Tenant::create($validated);
 
-            // Mark room as OCCUPIED
             $room->update([
-                'status' => 'Occupied'
+                'status' => 1,
+                'occupied' => $validated['occupied']
             ]);
+
+            return $tenant;
         });
 
         return response()->json([
             'success' => true,
             'message' => 'Tenant created successfully',
             'result'  => $tenant->load('room')
-        ]);
+        ], 200);
     }
 
     /**
@@ -72,7 +76,7 @@ class TenantController extends Controller
             'success' => true,
             'message' => 'Tenant details fetched successfully',
             'result'  => $tenant
-        ]);
+        ], 200);
     }
 
     /**
@@ -83,42 +87,43 @@ class TenantController extends Controller
         $tenant = Tenant::findOrFail($id);
 
         $validated = $request->validate([
-            'first_name'    => 'required|string|max:50',
-            'last_name'     => 'required|string|max:50',
-            'email'         => 'sometimes|email|unique:tenants,email,' . $tenant->id,
-            'room_id'       => 'required|exists:rooms,id',
-            'move_in_date'  => 'sometimes|date',
-            'status'        => 'sometimes|string|in:Active,Left,Inactive',
+            'first_name'   => 'required|string|max:50',
+            'last_name'    => 'required|string|max:50',
+            'email'        => 'sometimes|email|unique:tenants,email,' . $tenant->id,
+            'room_id'      => 'required|exists:rooms,id',
+            'move_in_date' => 'sometimes|date',
+            'status'       => 'nullable|integer|in:0,1,2',
+            'occupied'     => 'required|integer|min:1',
         ]);
 
-        DB::transaction(function () use ($tenant, $validated) {
+        $tenant = DB::transaction(function () use ($tenant, $validated) {
 
-            // If room is changed
+            // 🔹 If room is changed
             if ($tenant->room_id !== $validated['room_id']) {
 
-                // Free old room
-                Room::where('id', $tenant->room_id)->update([
-                    'status' => 'Available'
-                ]);
+                // Lock & free old room
+                Room::where('id', $tenant->room_id)
+                    ->lockForUpdate()
+                    ->update(['status' => 0, 'occupied' => 0]);
 
-                // Occupy new room (must be available)
+                // Lock & occupy new room
                 Room::where('id', $validated['room_id'])
-                    ->where('status', 'Available')
+                    ->where('status', 0)
                     ->lockForUpdate()
                     ->firstOrFail()
-                    ->update([
-                        'status' => 'Occupied'
-                    ]);
+                    ->update(['status' => 1, 'occupied' => $request->occupied]);
             }
 
             $tenant->update($validated);
+
+            return $tenant;
         });
 
         return response()->json([
             'success' => true,
             'message' => 'Tenant updated successfully',
-            'result'  => $tenant->load('room')
-        ]);
+            'result'  => $tenant->load('room'),
+        ], 200);
     }
 
     /**
@@ -130,10 +135,9 @@ class TenantController extends Controller
 
         DB::transaction(function () use ($tenant) {
 
-            // Free room
-            Room::where('id', $tenant->room_id)->update([
-                'status' => 'Available'
-            ]);
+            Room::where('id', $tenant->room_id)
+                ->lockForUpdate()
+                ->update(['status' => 0]);
 
             $tenant->delete();
         });
@@ -141,7 +145,7 @@ class TenantController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Tenant deleted successfully'
-        ]);
+        ], 200);
     }
     
     /**
@@ -152,33 +156,41 @@ class TenantController extends Controller
         $tenant = Tenant::with('room')->findOrFail($id);
 
         // Only active tenants can be ended
-        if ($tenant->status !== 'Active') {
+        if ($tenant->status !== 1) {
             return response()->json([
                 'success' => false,
                 'message' => 'Tenancy has already ended or tenant is inactive',
             ], 400);
         }
 
-        DB::transaction(function () use ($tenant) {
-            // 1️⃣ Update tenant status to Inactive
+        $tenant = DB::transaction(function () use ($tenant) {
+
+            // 🔒 Lock tenant row
+            $tenant->lockForUpdate();
+
+            // 1️⃣ Mark tenant as LEFT
             $tenant->update([
-                'status' => 'Inactive',
-                'ended_at' => now(), // optional column for history
+                'status'   => 2, // Left
+                'ended_at' => now(),
             ]);
 
-            // 2️⃣ Free the room
-            if ($tenant->room) {
-                $tenant->room->update([
-                    'status' => 'Available',
-                    'occupied' => 0,
-                ]);
+            // 2️⃣ Free the room (lock it)
+            if ($tenant->room_id) {
+                Room::where('id', $tenant->room_id)
+                    ->lockForUpdate()
+                    ->update([
+                        'status'   => 0, // Available
+                        'occupied' => 0,
+                    ]);
             }
+
+            return $tenant;
         });
 
         return response()->json([
             'success' => true,
             'message' => 'Tenancy ended successfully',
-            'result' => $tenant->fresh('room')
-        ]);
+            'result'  => $tenant->fresh('room'),
+        ], 200);
     }
 }

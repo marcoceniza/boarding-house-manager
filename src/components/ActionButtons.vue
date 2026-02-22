@@ -1,52 +1,35 @@
 <script setup>
-import { EyeIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline'
-import BaseButton from '@/components/base/BaseButton.vue'
-import { useRoomStore } from '@/stores/RoomStore'
+import { EyeIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline';
+import BaseButton from '@/components/base/BaseButton.vue';
 
-const props = defineProps({ room: Object })
-const roomStore = useRoomStore();
+const props = defineProps({
+    item: { type: Object, required: true },
+    locked: { type: Boolean, default: false }
+});
 
-const isLocked = props.room.tenants && props.room.tenants.length > 0;
-
-const openViewModal = () => {
-    roomStore.currentMode = 'View';
-    roomStore.clearViewData();
-    roomStore.isOpenModal = true;
-    roomStore.show(props.room.id);
-}
-
-const openEditModal = () => {
-    roomStore.currentMode = 'Edit';
-    roomStore.clearViewData();
-    roomStore.isOpenModal = true;
-    roomStore.show(props.room.id);
-}
-
-const openDeleteModal = () => {
-    roomStore.currentMode = 'Delete';
-    roomStore.selectedRoom = props.room;
-    roomStore.isOpenDeleteModal = true;
-}
+const emit = defineEmits(['view', 'edit', 'delete']);
 </script>
 
 <template>
-    <BaseButton
-        size="sm"
-        @click="openViewModal"
-    >
+    <BaseButton size="sm" @click="emit('view', item)">
         <EyeIcon class="size-4" />
     </BaseButton>
 
-    <template v-if="!isLocked">
-        <BaseButton @click="openEditModal" size="sm" variant="warning">
-            <PencilSquareIcon class="size-4" />
-        </BaseButton>
-        <BaseButton @click="openDeleteModal" size="sm" variant="danger">
-            <TrashIcon class="size-4" />
-        </BaseButton>
-    </template>
+    <BaseButton
+        size="sm"
+        variant="warning"
+        @click="emit('edit', item)"
+        :disabled="props.locked"
+    >
+        <PencilSquareIcon class="size-4" />
+    </BaseButton>
 
-    <span v-else class="text-xs text-gray-400 italic">
-        Locked
-    </span>
+    <BaseButton
+        size="sm"
+        variant="danger"
+        @click="emit('delete', item)"
+        :disabled="props.locked"
+    >
+        <TrashIcon class="size-4" />
+    </BaseButton>
 </template>

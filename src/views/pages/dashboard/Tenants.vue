@@ -1,40 +1,74 @@
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import dayjs from "dayjs";
 import { useTenantStore } from "@/stores/TenantStore";
+import { PlusIcon, UserMinusIcon } from '@heroicons/vue/24/outline';
+import BaseButton from "@/components/base/BaseButton.vue";
+import StatusBadge from "@/components/StatusBadge.vue";
+import ActionButtons from "@/components/ActionButtons.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import TenantForm from "@/components/TenantForm.vue";
+import ConfirmDelete from "@/components/ConfirmDelete.vue";
+import { useRoomStore } from "@/stores/RoomStore";
+import ConfirmEndTenancy from "@/components/ConfirmEndTenancy.vue";
 
 const tenantStore = useTenantStore();
+const roomStore = useRoomStore();
 
-const showModal = ref(false);
-const currentMode = ref("Add");
-const selectedTenant = ref(null);
+const isEndTenancy = ref(false);
+const selectedTenantId = ref(null);
 
-// Tenant lock rule
-const isTenantLocked = (tenant) => {
-    return tenant.status === "Active";
-};
-
-// Handlers
 const openAddTenant = () => {
-    selectedTenant.value = null;
-    currentMode.value = "Add";
-    showModal.value = true;
+    tenantStore.selectedTenant = null;
+    tenantStore.currentMode = "Create";
+    tenantStore.isOpenModal = true;
 };
+const openViewTenant = (tenant) => {
+    tenantStore.currentMode = 'View';
+    tenantStore.clearViewData();
+    tenantStore.isOpenModal = true;
+    tenantStore.show(tenant.id);
+}
+const openEditTenant = (tenant) => {
+    tenantStore.currentMode = 'Update';
+    tenantStore.clearViewData();
+    tenantStore.isOpenModal = true;
+    tenantStore.show(tenant.id, tenant.room.occupied);
+}
+const openDeleteTenant = (tenant) => {
+    tenantStore.currentMode = 'Delete';
+    tenantStore.selectedTenant = tenant;
+    tenantStore.isOpenDeleteModal = true;
+}
+const openEndTenancy = (tenant) => {
+    selectedTenantId.value = tenant.id;
+    tenantStore.selectedTenant = tenant;
+    isEndTenancy.value = true;
+};
+const confirmEndTenancy = async () => {
+    if (!selectedTenantId.value) return;
+
+    await tenantStore.endTenancy(selectedTenantId.value);
+    isEndTenancy.value = false;
+    selectedTenantId.value = null;
+};
+const confirmTenantDelete = async () => {
+    await tenantStore.destroy(tenantStore.selectedTenant.id);
+    tenantStore.isOpenDeleteModal = false;
+}
+
+onMounted(() => { roomStore.index() });
 </script>
 
 <template>
     <div class="flex justify-end items-center my-4">
-        <button
-            @click="openAddTenant"
-            class="px-4 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700"
-        >
-            + Add Tenant
-        </button>
+        <BaseButton variant="success" size="sm" @click="openAddTenant">
+            <PlusIcon class="size-4" /> Create Tenant
+        </BaseButton>
     </div>
 
-    <div class="bg-white rounded-lg shadow overflow-x-auto">
+    <!-- DESKTOP -->
+    <div class="hidden md:block bg-white rounded-lg shadow overflow-x-auto">
         <table class="min-w-full border border-gray-200">
             <thead class="bg-gray-100 text-gray-700 text-sm uppercase">
                 <tr>
@@ -45,86 +79,137 @@ const openAddTenant = () => {
                     <th class="px-4 py-3 text-left">Move in Date</th>
                     <th class="px-4 py-3 text-left">Status</th>
                     <th class="px-4 py-3 text-center">Actions</th>
+                    <th class="px-4 py-3 text-center">End Tenancy</th>
                 </tr>
             </thead>
 
-            <tbody class="divide-y divide-gray-200 text-sm">
-                <tr v-if="tenantStore.tenants.length === 0">
-                    <td class="text-center text-gray-500 py-10" colspan="7">No Data</td>
+            <tbody class="divide-y text-sm">
+                <tr v-if="tenantStore.isListLoading"> 
+                    <td class="text-center text-gray-500 h-15" colspan="8">Loading...</td> 
+                </tr> 
+                <tr v-else-if="tenantStore.tenants.length === 0"> 
+                    <td class="text-center text-gray-500 h-15" colspan="8">No Data</td> 
                 </tr>
-                <tr
-                    v-else
-                    v-for="tenant in tenantStore.tenants"
-                    :key="tenant.id"
-                    class="hover:bg-gray-50"
-                >
+                <tr v-else v-for="tenant in tenantStore.tenants" :key="tenant.id">
                     <td class="px-4 py-3 font-medium">{{ tenant.first_name }}</td>
                     <td class="px-4 py-3 font-medium">{{ tenant.last_name }}</td>
                     <td class="px-4 py-3 font-medium">{{ tenant.email }}</td>
-                    <td class="px-4 py-3 font-medium">
-                        {{ tenant.room?.room_number ?? '-' }}
-                    </td>
-                    <td class="px-4 py-3 font-medium">
-                        {{ dayjs(tenant.move_in_date).format('MMMM D, YYYY') }}
-                    </td>
+                    <td class="px-4 py-3 font-medium">{{ tenant.room?.room_number ?? '-' }}</td>
+                    <td class="px-4 py-3 font-medium">{{ dayjs(tenant.move_in_date).format('MMMM D, YYYY') }}</td>
                     <td class="px-4 py-3">
-                        <span
-                            class="px-2 py-1 rounded-full text-xs font-semibold"
-                            :class="{
-                                'bg-green-100 text-green-800': tenant.status === 'Active',
-                                'bg-gray-100 text-gray-800': tenant.status !== 'Active'
-                            }"
-                        >
-                            {{ tenant.status }}
-                        </span>
+                        <StatusBadge :status="tenant.status" item="tenant" />
                     </td>
-
-                    <!-- Actions -->
                     <td class="px-4 py-3 text-center space-x-2">
-                        <!-- View (always allowed) -->
-                        <button
-                            @click="tenantStore.show(tenant.id); currentMode = 'View'; showModal = true"
-                            class="px-3 py-1 text-xs bg-gray-600 text-white rounded hover:bg-gray-700"
+                        <ActionButtons
+                            :item="tenant"
+                            @view="openViewTenant(tenant)"
+                            @edit="openEditTenant(tenant)"
+                            @delete="openDeleteTenant(tenant)"
+                        />
+                    </td>
+                    <td class="text-center">
+                        <BaseButton
+                            class="block mx-auto"
+                            variant="danger"
+                            size="sm"
+                            @click="openEndTenancy(tenant)"
                         >
-                            View
-                        </button>
-
-                        <!-- Edit & Delete only if NOT active -->
-                        <template v-if="!isTenantLocked(tenant)">
-                            <button
-                                @click="tenantStore.show(tenant.id); currentMode = 'Edit'; showModal = true"
-                                class="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
-                            >
-                                Edit
-                            </button>
-
-                            <button
-                                @click="tenantStore.delete(tenant.id)"
-                                class="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700"
-                            >
-                                Delete
-                            </button>
-                        </template>
-
-                        <!-- Active tenant action -->
-                        <button
-                            v-else
-                            @click="tenantStore.endTenancy(tenant.id)"
-                            class="px-3 py-1 text-xs bg-orange-600 text-white rounded hover:bg-orange-700"
-                        >
-                            End Tenancy
-                        </button>
+                            <UserMinusIcon class="size-4" />
+                        </BaseButton>
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
 
+    <!-- MOBILE -->
+    <div class="md:hidden">
+        <div
+            v-if="tenantStore.isListLoading"
+            class="bg-white rounded-lg shadow p-6 text-center text-gray-500"
+        >
+            Loading...
+        </div>
+        <div
+            v-else-if="tenantStore.tenants.length === 0"
+            class="bg-white rounded-lg shadow p-6 text-center text-gray-500"
+        >
+            No Data
+        </div>
+        <div v-else class="space-y-4">
+            <div
+                v-for="tenant in tenantStore.tenants"
+                :key="tenant.id"
+                class="bg-white rounded-lg shadow p-4"
+            >
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-lg">Tenant</h3>
+                    <StatusBadge :status="tenant.status" item="tenant" />
+                </div>
+
+                <div class="mt-3 text-sm space-y-1 text-gray-600">
+                    <p><strong>Name:</strong> {{ tenant.first_name }} {{ tenant.last_name }}</p>
+                    <p><strong>Email:</strong> {{ tenant.email }}</p>
+                    <p><strong>Move in Date:</strong> {{ dayjs(tenant.move_in_date).format('MMMM D, YYYY') }}</p>
+                    <p><strong>Room Number:</strong> {{ tenant.room?.room_number ?? '-' }}</p>
+                </div>
+
+                <div class="mt-4 flex gap-2 justify-end">
+                    <ActionButtons
+                        :item="tenant"
+                        @view="openViewTenant(tenant)"
+                        @edit="openEditTenant(tenant)"
+                        @delete="openDeleteTenant(tenant)"
+                    />
+                    <BaseButton
+                        variant="danger"
+                        size="sm"
+                        @click="openEndTenancy(tenant)"
+                    >
+                        <UserMinusIcon class="size-4" />
+                    </BaseButton>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal -->
     <BaseModal
-        :show="showModal"
-        @close="showModal = false; tenantStore.clearViewData()"
+        v-model:isOpen="tenantStore.isOpenModal"
+        :title="tenantStore.currentMode"
+        @close="tenantStore.isOpenModal = false; tenantStore.clearViewData()"
     >
-        <TenantForm :mode="currentMode" />
+        <div v-if="tenantStore.isViewLoading">
+            <div class="space-y-2 p-6">
+                <div class="h-4 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+                <div class="h-4 bg-gray-300 rounded w-full animate-pulse"></div>
+                <div class="h-4 bg-gray-300 rounded w-1/2 animate-pulse"></div>
+            </div>
+        </div>
+        <TenantForm
+            v-else
+            :mode="tenantStore.currentMode"
+            @close="tenantStore.isOpenModal = false"
+        />
     </BaseModal>
+
+    <!-- Delete confirm end tenancy -->
+    <ConfirmEndTenancy
+        :isOpen="isEndTenancy"
+        title="End Tenancy"
+        :message="`${tenantStore.selectedTenant?.first_name} ${tenantStore.selectedTenant?.last_name}?`"
+        :loading="tenantStore.isEndTenancyLoading"
+        @confirm="confirmEndTenancy"
+        @close="isEndTenancy = false"
+    />
+
+    <!-- Delete confirm tenant -->
+    <ConfirmDelete
+        :isOpen="tenantStore.isOpenDeleteModal"
+        title="Delete Tenant"
+        :message="`Delete tenant ${tenantStore.selectedTenant?.first_name} ${tenantStore.selectedTenant?.last_name}?`"
+        :loading="tenantStore.isDeleteLoading"
+        @confirm="confirmTenantDelete"
+        @close="tenantStore.isOpenDeleteModal = false"
+    />
 </template>

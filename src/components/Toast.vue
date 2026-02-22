@@ -8,17 +8,17 @@ const toastStore = useToastStore();
     <TransitionGroup
         name="toast"
         tag="div"
-        class="fixed top-5 right-5 z-50 flex flex-col gap-3"
+        class="fixed bottom-5 right-5 z-50 flex flex-col gap-3"
     >
         <div
             v-for="toast in toastStore.toasts"
             :key="toast.id"
             :class="[
                 'min-w-28 px-4 py-3 rounded shadow-lg text-white flex justify-between items-center transition-all duration-300',
-                toast.type === 'success' ? 'bg-green-500' :
-                toast.type === 'error' ? 'bg-red-500' :
-                toast.type === 'warning' ? 'bg-yellow-500 text-black' :
-                'bg-blue-500'
+                toast.type === 'success' ? 'bg-green-600' :
+                toast.type === 'error' ? 'bg-red-600' :
+                toast.type === 'warning' ? 'bg-yellow-600 text-black' :
+                'bg-blue-600'
             ]"
         >
         <span>{{ toast.message }}</span>

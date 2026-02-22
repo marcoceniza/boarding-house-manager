@@ -1,26 +1,35 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import api from '@/lib/axios';
+import { useToastStore } from './toastStore';
+import { useRoomStore } from './RoomStore';
 
 export const useBillingStore = defineStore('billing', () => {
   const billings = ref([]);
   const viewData = ref(null);
-  const isLoading = ref(false);
+  const isListLoading = ref(false);
+  const isFormLoading = ref(false);
+  const isViewLoading = ref(false);
+  const isDeleteLoading = ref(false);
+  const toastStore = useToastStore();
+  const errors = ref({});
+  const isOpenModal = ref(false);
+  const isOpenDeleteModal = ref(false);
+  const currentMode = ref("Add");
+  const roomStore = useRoomStore();
 
   /* =======================
     Fetch all billings
   ======================= */
   const index = async () => {
     try {
-      isLoading.value = true;
+      isListLoading.value = true;
       const res = await api.get('/api/billings');
       billings.value = res.data.result;
-
-      console.log(billings.value);
     } catch (error) {
       console.error(error);
     } finally {
-      isLoading.value = false;
+      isListLoading.value = false;
     }
   }
 
@@ -29,25 +38,40 @@ export const useBillingStore = defineStore('billing', () => {
   ======================= */
   const store = async (data) => {
     try {
+      isFormLoading.value = true;
+
       const res = await api.post('/api/billings', data);
-      billings.value.unshift(res.data.result); // optional instant UI update
+      billings.value.unshift(res.data.result);
+      toastStore.success(res.data.message);
+      await roomStore.index();
+
+      return true;
     } catch (error) {
-      console.error(error);
+
+      if (error.response?.status === 422) {
+          errors.value = error.response.data.errors;
+      } else {
+          toastStore.error("Something went wrong");
+      }
+
+      return false;
+    } finally {
+      isFormLoading.value = false;
     }
   }
 
   /* =======================
     View single billing
   ======================= */
-  const show = async (id) => {
+  const show = async (id, occupied) => {
     try {
-      isLoading.value = true;
+      isViewLoading.value = true;
       const res = await api.get(`/api/billings/${id}`);
       viewData.value = res.data.result;
     } catch (error) {
       console.error(error);
     } finally {
-      isLoading.value = false;
+      isViewLoading.value = false;
     }
   }
 
@@ -56,6 +80,8 @@ export const useBillingStore = defineStore('billing', () => {
   ======================= */
   const update = async (id, data) => {
     try {
+      isFormLoading.value = true;
+
       const res = await api.put(`/api/billings/${id}`, data);
 
       // sync local list
@@ -65,16 +91,39 @@ export const useBillingStore = defineStore('billing', () => {
       }
 
       viewData.value = res.data.result;
+      await roomStore.index();
+      toastStore.success(res.data.message);
+
+      return true;
     } catch (error) {
-      console.error(error);
+
+      if (error.response?.status === 422) {
+          errors.value = error.response.data.errors;
+      } else {
+          toastStore.error("Something went wrong");
+      }
+
+      return false;
+    } finally {
+      isFormLoading.value = false;
     }
   }
 
   /* =======================
-    Clear modal state
+    Delete billing
   ======================= */
-  const clearViewData = () => {
-    viewData.value = null;
+  const destroy = async (id) => {
+    try {
+      isDeleteLoading.value = true;
+      const res = await api.delete(`/api/billings/${id}`);
+      toastStore.success(res.data.message);
+      billings.value = billings.value.filter(r => r.id !== id);
+      await roomStore.index();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      isDeleteLoading.value = false;
+    }
   }
 
   /* =======================
@@ -90,18 +139,40 @@ export const useBillingStore = defineStore('billing', () => {
     }
   }
 
-  // auto fetch
-  index()
+  /* =======================
+    Clear modal state
+  ======================= */
+  const clearViewData = () => {
+    viewData.value = null;
+  }
+
+  /* =======================
+    Clear errors state
+  ======================= */
+  const clearErrors = () => {
+    errors.value = {}
+  }
+
+  index();
 
   return {
     billings,
     viewData,
-    isLoading,
     index,
     store,
     show,
     update,
     clearViewData,
+    errors,
+    clearErrors,
+    isOpenModal,
+    currentMode,
+    isListLoading,
+    isViewLoading,
+    isFormLoading,
+    destroy,
+    isOpenDeleteModal,
+    isDeleteLoading,
     sendInvoice
   }
 })

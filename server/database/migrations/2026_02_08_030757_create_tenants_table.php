@@ -14,13 +14,9 @@ return new class extends Migration
         Schema::create('tenants', function (Blueprint $table) {
             $table->id();
 
-            // First name of the tenant
+            // Tenant basic info
             $table->string('first_name');
-
-            // Last name of the tenant
             $table->string('last_name');
-
-            // Tenant email address (used for billing notifications)
             $table->string('email')->unique();
 
             // Reference to the room the tenant occupies
@@ -29,12 +25,19 @@ return new class extends Migration
             // Date when tenant moved in
             $table->date('move_in_date');
 
-            // Tenant status as numeric code
+            // Date when tenancy ended (nullable)
+            $table->timestamp('ended_at')->nullable();
+
+            // Tenant status
             // 0 = Inactive, 1 = Active, 2 = Left
             $table->tinyInteger('status')->default(1)
                     ->comment('0 = Inactive, 1 = Active, 2 = Left');
 
             $table->timestamps();
+
+            // Indexes (performance)
+            $table->index('room_id');
+            $table->index('status');
         });
     }
 

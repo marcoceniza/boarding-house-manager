@@ -7,21 +7,43 @@ import StatusBadge from "@/components/StatusBadge.vue";
 import ActionButtons from "@/components/ActionButtons.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import RoomForm from "@/components/RoomForm.vue";
-import RoomDeleteConfirm from "@/components/RoomDeleteConfirm.vue";
+import ConfirmDelete from "@/components/ConfirmDelete.vue";
 
 const roomStore = useRoomStore();
 
 const openAddRoom = () => {
     roomStore.selectedRoom = null;
-    roomStore.currentMode = "Add";
+    roomStore.currentMode = "Create";
     roomStore.isOpenModal = true;
 };
+const openViewRoom = (room) => {
+    roomStore.currentMode = 'View';
+    roomStore.clearViewData();
+    roomStore.isOpenModal = true;
+    roomStore.show(room.id);
+}
+const openEditRoom = (room) => {
+    roomStore.currentMode = 'Update';
+    roomStore.clearViewData();
+    roomStore.isOpenModal = true;
+    roomStore.show(room.id);
+}
+const openDeleteRoom = (room) => {
+    roomStore.currentMode = 'Delete';
+    roomStore.selectedRoom = room;
+    roomStore.isOpenDeleteModal = true;
+}
+
+const confirmRoomDelete = async () => {
+    await roomStore.destroy(roomStore.selectedRoom.id)
+    roomStore.isOpenDeleteModal = false
+}
 </script>
 
 <template>
     <div class="flex justify-end items-center my-4">
         <BaseButton variant="success" size="sm" @click="openAddRoom">
-            <PlusIcon class="size-4" /> Add Room
+            <PlusIcon class="size-4" /> Create Room
         </BaseButton>
     </div>
 
@@ -57,7 +79,13 @@ const openAddRoom = () => {
                         <StatusBadge :status="room.status" />
                     </td>
                     <td class="px-4 py-3 text-center space-x-2">
-                        <ActionButtons :room="room" />
+                        <ActionButtons
+                            :item="room"
+                            :locked="room.tenants?.length > 0"
+                            @view="openViewRoom"
+                            @edit="openEditRoom"
+                            @delete="openDeleteRoom"
+                        />
                     </td>
                 </tr>
             </tbody>
@@ -99,7 +127,13 @@ const openAddRoom = () => {
                 </div>
 
                 <div class="mt-4 flex gap-2 justify-end">
-                    <ActionButtons :room="room" />
+                    <ActionButtons
+                        :item="room"
+                        :locked="room.tenants?.length > 0"
+                        @view="openViewRoom"
+                        @edit="openEditRoom"
+                        @delete="openDeleteRoom"
+                    />
                 </div>
             </div>
         </div>
@@ -125,8 +159,13 @@ const openAddRoom = () => {
         />
     </BaseModal>
 
-    <!-- Delete confirm -->
-    <RoomDeleteConfirm
-        v-if="roomStore.currentMode === 'Delete' && roomStore.isOpenDeleteModal"
+    <!-- Delete confirm room -->
+    <ConfirmDelete
+        :isOpen="roomStore.isOpenDeleteModal"
+        title="Delete Room"
+        :message="`Delete room ${roomStore.selectedRoom?.room_number}?`"
+        :loading="roomStore.isDeleteLoading"
+        @confirm="confirmRoomDelete"
+        @close="roomStore.isOpenDeleteModal = false"
     />
 </template>

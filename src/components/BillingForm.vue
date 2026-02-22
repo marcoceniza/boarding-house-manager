@@ -1,16 +1,18 @@
 <script setup>
-import { reactive, watch, computed } from "vue";
+import { reactive, watch, computed, onMounted } from "vue";
 import dayjs from "dayjs";
 import BaseInput from "./base/BaseInput.vue";
-import { useBillingStore } from "@/stores/BillingStore";
+import BaseButton from "./base/BaseButton.vue";
 import { useTenantStore } from "@/stores/TenantStore";
+import { useRoomStore } from "@/stores/RoomStore";
+import { useBillingStore } from "@/stores/BillingStore";
 
-const billingStore = useBillingStore();
 const tenantStore = useTenantStore();
+const roomStore = useRoomStore();
+const billingStore = useBillingStore();
 
-const props = defineProps({
-    mode: { type: String, default: "Add" }, // Add | Edit | View
-});
+const emit = defineEmits(["close"]);
+const props = defineProps({ mode: { type: String, default: "Create" } });
 
 const formData = reactive({
     tenant_id: "",
@@ -22,23 +24,9 @@ const formData = reactive({
     status: "",
 });
 
-// View mode check
 const isViewMode = computed(() => props.mode === "View");
-
-// Select options
-const statusOptions = [
-    { label: "Unpaid", value: "Unpaid" },
-    { label: "Paid", value: "Paid" },
-    { label: "Overdue", value: "Overdue" },
-];
-
-// Tenant dropdown (display name, value = id)
-const tenantOptions = computed(() =>
-    tenantStore.tenants.map(t => ({
-        label: `${t.first_name} ${t.last_name}`,
-        value: t.id,
-    }))
-);
+const isFetching = computed(() => billingStore.isFormLoading);
+const isDisabled = computed(() => props.mode === "View" || isFetching.value);
 
 const months = computed(() => {
     const list = [];
@@ -49,50 +37,54 @@ const months = computed(() => {
     return list;
 });
 
-// Populate form when viewing / editing
 watch(() => billingStore.viewData, (billing) => {
-    
-    if ((props.mode === "View" || props.mode === "Edit") && billing) {
-        formData.tenant_id = billing.tenant_id ?? "";
-        formData.billing_period = billing.billing_period ?? "";
-        formData.rent = billing.rent ?? "";
-        formData.water = billing.water ?? "";
-        formData.electricity = billing.electricity ?? "";
-        formData.due_date = billing.due_date ?? "";
-        formData.status = billing.status ?? "";
-    }else {
-        // Add mode → reset
-        Object.keys(formData).forEach(k => (formData[k] = ""));
+    if (props.mode === "View" || props.mode === "Update") {
+        if (billing) {
+            formData.tenant_id = billing.tenant_id ?? "";
+            formData.billing_period = billing.billing_period ?? "";
+            formData.rent = billing.rent ?? "";
+            formData.water = billing.water ?? "";
+            formData.electricity = billing.electricity ?? "";
+            formData.due_date = billing.due_date ?? "";
+            formData.status = billing.status ?? "";
+        }
+    } else {
+        Object.keys(formData).forEach((k) => (formData[k] = ""));
+        formData.occupied = null;
+        formData.status = 1;
+        formData.room_id = null;
     }
 }, { immediate: true });
 
-const total = computed(() => {
-    const r = parseFloat(formData.rent) || 0;
-    const w = parseFloat(formData.water) || 0;
-    const e = parseFloat(formData.electricity) || 0;
-    return r + w + e;
-});
+const submitForm = async () => {
+    let success = false;
 
-// Submit handler
-const submitForm = () => {
-    if (props.mode === "Edit") {
-        billingStore.update(billingStore.viewData.id, { ...formData });
+    if (props.mode === "Update") {
+        success = await billingStore.update(
+            billingStore.viewData.id,
+            { ...formData }
+        );
     } else {
-        billingStore.store({ ...formData });
+        success = await billingStore.store({ ...formData });
+    }
+
+    if (success) {
+        emit('close');
+        billingStore.errors = {};
     }
 };
+
+onMounted(() => { roomStore.index() });
 </script>
 
 <template>
-    <form @submit.prevent="submitForm" class="space-y-5">
+    <form @submit.prevent="submitForm" class="space-y-5 flex flex-wrap justify-between">
         <BaseInput
             label="Tenant"
             variant="select"
-            :options="tenantOptions"
-            option-label="label"
-            option-value="value"
             v-model="formData.tenant_id"
             :disabled="isViewMode"
+            :error="billingStore.errors?.tenant_id?.[0]"
         />
         <BaseInput
             label="Billing Period"
@@ -100,6 +92,7 @@ const submitForm = () => {
             :options="months"
             v-model="formData.billing_period"
             :disabled="isViewMode"
+            :error="billingStore.errors?.billing_period?.[0]"
         />
         <BaseInput
             label="Rent"
@@ -107,6 +100,7 @@ const submitForm = () => {
             v-model="formData.rent"
             placeholder="Enter rent"
             :disabled="isViewMode"
+            :error="billingStore.errors?.rent?.[0]"
         />
         <BaseInput
             label="Water"
@@ -114,6 +108,7 @@ const submitForm = () => {
             v-model="formData.water"
             placeholder="Enter water"
             :disabled="isViewMode"
+            :error="billingStore.errors?.water?.[0]"
         />
         <BaseInput
             label="Electricity"
@@ -121,40 +116,38 @@ const submitForm = () => {
             v-model="formData.electricity"
             placeholder="Enter electricity"
             :disabled="isViewMode"
+            :error="billingStore.errors?.electricity?.[0]"
         />
         <BaseInput
             label="Due Date"
             type="date"
             v-model="formData.due_date"
             :disabled="isViewMode"
+            :error="billingStore.errors?.due_date?.[0]"
         />
-        <BaseInput
-            label="Status"
-            variant="select"
-            :options="statusOptions"
-            v-model="formData.status"
-            :disabled="isViewMode"
-        />
-        <BaseInput
-            label="Total"
-            :value="total"
-            :disabled="true"
-        />
-        <!-- Actions -->
-        <div v-if="props.mode !== 'View'" class="flex justify-end gap-2 pt-4">
-            <button
-                type="button"
-                class="px-4 py-2 rounded-lg border"
-                @click="$emit('cancel')"
+
+        <div v-if="props.mode !== 'View'" class="flex justify-end w-full gap-2 pt-4">
+            <BaseButton
+                variant="secondary"
+                size="sm"
+                :disabled="isFetching"
+                @click="emit('close'); billingStore.clearErrors()"
             >
                 Cancel
-            </button>
-            <button
+            </BaseButton>
+            <BaseButton
                 type="submit"
-                class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                size="sm"
+                :loading="isFetching"
+                :disabled="isFetching"
             >
-                {{ props.mode }}
-            </button>
+                <span v-if="isFetching">
+                    {{ props.mode === 'Create' ? 'Creating...' : 'Updating...' }}
+                </span>
+                <span v-else>
+                    {{ props.mode }}
+                </span>
+            </BaseButton>
         </div>
     </form>
 </template>
