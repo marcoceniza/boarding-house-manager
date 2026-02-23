@@ -35,7 +35,7 @@ class TenantController extends Controller
             'email'         => 'required|email|unique:tenants,email',
             'room_id'       => 'required|exists:rooms,id',
             'move_in_date'  => 'required|date|after_or_equal:today',
-            'occupied'     => 'required|integer|min:1',
+            'occupied'      => 'required|integer|min:1',
             'status'        => 'nullable|integer|in:0,1,2',
         ], [
             'move_in_date.after_or_equal' => 'Move-in date cannot be earlier than today.'

@@ -16,6 +16,7 @@ export const useBillingStore = defineStore('billing', () => {
   const isOpenModal = ref(false);
   const isOpenDeleteModal = ref(false);
   const currentMode = ref("Add");
+  const selectedBilling = ref(null);
   const roomStore = useRoomStore();
 
   /* =======================
@@ -173,6 +174,7 @@ export const useBillingStore = defineStore('billing', () => {
     destroy,
     isOpenDeleteModal,
     isDeleteLoading,
-    sendInvoice
+    sendInvoice,
+    selectedBilling
   }
 })

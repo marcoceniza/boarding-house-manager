@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('billing_period');
 
             // Amounts billed for the period
-            $table->decimal('rent', 10, 2)->default(0);
+            $table->decimal('rent', 10, 2);
             $table->decimal('water', 10, 2)->default(0);
             $table->decimal('electricity', 10, 2)->default(0);
 
@@ -33,8 +33,9 @@ return new class extends Migration
             $table->date('due_date');
 
             // Billing payment status
-            // Possible values: unpaid, paid, overdue
-            $table->string('status')->default('unpaid');
+            // 0 = unpaid, 1 = paid, 2 = overdue
+            $table->tinyInteger('status')->default(0)
+                    ->comment('0 = Unpaid, 1 = Paid, 2 = Overdue');
 
             // Prevent duplicate billing for the same tenant and period
             $table->unique(['tenant_id', 'billing_period']);

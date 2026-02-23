@@ -29,14 +29,21 @@ class BillingController extends Controller
      */
     public function store(Request $request)
     {
+        // Remove commas before validation
+        $request->merge([
+            'rent' => str_replace(',', '', $request->rent),
+        ]);
+
         $validated = $request->validate([
             'tenant_id' => 'required|exists:tenants,id',
-            'billing_period' => 'required|string', // e.g., '2026-02'
+            'billing_period' => 'required|string',
             'rent' => 'required|numeric|min:0',
-            'water' => 'nullable|numeric|min:0',
-            'electricity' => 'nullable|numeric|min:0',
-            'due_date' => 'required|date',
-            'status' => 'nullable|string|in:Unpaid,Paid,Overdue',
+            'water' => 'required|nullable|numeric|min:0',
+            'electricity' => 'required|nullable|numeric|min:0',
+            'due_date' => 'required|date|after_or_equal:today',
+            'status' => 'nullable|integer|in:0,1,2',
+        ], [
+            'due_date.after_or_equal' => 'Billing period cannot be earlier than today.'
         ]);
 
         // Set default 0 for optional fields
@@ -74,14 +81,21 @@ class BillingController extends Controller
     {
         $billing = Billing::findOrFail($id);
 
+        // Remove commas before validation
+        $request->merge([
+            'rent' => str_replace(',', '', $request->rent),
+        ]);
+
         $validated = $request->validate([
             'tenant_id' => 'sometimes|exists:tenants,id',
             'billing_period' => 'sometimes|string',
             'rent' => 'sometimes|numeric|min:0',
             'water' => 'sometimes|numeric|min:0',
             'electricity' => 'sometimes|numeric|min:0',
-            'due_date' => 'sometimes|date',
-            'status' => 'nullable|string|in:Unpaid,Paid,Overdue',
+            'due_date' => 'required|date|after_or_equal:today',
+            'status' => 'nullable|integer|in:0,1,2',
+        ], [
+            'due_date.after_or_equal' => 'Billing period cannot be earlier than today.'
         ]);
 
         // Update billing (total will be recalculated automatically in the model)

@@ -17,7 +17,9 @@ const props = defineProps({
     rows: { type: Number, default: 3 },
     label: { type: String, default: "" },
     error: { type: String, default: "" },
-    options: { type: Array, default: () => [] }
+    note: { type: String, default: "" },
+    options: { type: Array, default: () => [] },
+    isMode: { type: String, default: '' }
 });
 
 const inputClasses = computed(() => [
@@ -108,6 +110,10 @@ const inputClasses = computed(() => [
 
         <p v-if="error" class="text-sm text-red-500">
             {{ error }}
+        </p>
+
+        <p v-if="note && isMode == 'Create'" class="text-[10px] text-red-500 italic">
+            {{ note }}
         </p>
     </div>
 </template>

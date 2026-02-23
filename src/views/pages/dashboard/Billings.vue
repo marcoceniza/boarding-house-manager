@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted } from "vue";
 import dayjs from "dayjs";
-import { PlusIcon, UserMinusIcon } from '@heroicons/vue/24/outline';
+import { PlusIcon, InboxArrowDownIcon } from '@heroicons/vue/24/outline';
 import BaseButton from "@/components/base/BaseButton.vue";
 import StatusBadge from "@/components/StatusBadge.vue";
 import ActionButtons from "@/components/ActionButtons.vue";
@@ -40,8 +40,17 @@ const confirmBillingDelete = async () => {
     await billingStore.destroy(billingStore.selectedBilling.id);
     billingStore.isOpenDeleteModal = false;
 }
+const formatPrice = (price) => {
+    const numeric = price.toString().replace(/\D/g, '');
 
-onMounted(() => { roomStore.index() });
+    return numeric.length > 3
+        ? numeric.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+        : numeric;
+}
+
+onMounted( async () => {
+    await roomStore.index();
+});
 </script>
 
 <template>
@@ -58,18 +67,17 @@ onMounted(() => { roomStore.index() });
                 <tr>
                     <th class="px-4 py-3 text-left">Tenant</th>
                     <th class="px-4 py-3 text-left">Tenant Email</th>
-                    <th class="px-4 py-3 text-left">Billing Period</th>
                     <th class="px-4 py-3 text-left">Rent</th>
                     <th class="px-4 py-3 text-left">Water</th>
                     <th class="px-4 py-3 text-left">Electricity</th>
-                    <th class="px-4 py-3 text-left">Total</th>
+                    <th class="px-4 py-3 text-left">Billing Period</th>
                     <th class="px-4 py-3 text-left">Due Date</th>
                     <th class="px-4 py-3 text-left">Status</th>
+                    <th class="px-4 py-3 text-left">Total</th>
                     <th class="px-4 py-3 text-center">Actions</th>
                     <th class="px-4 py-3 text-center">Invoice</th>
                 </tr>
             </thead>
-
             <tbody class="divide-y text-sm">
                 <tr v-if="billingStore.isListLoading"> 
                     <td class="text-center text-gray-500 h-15" colspan="11">Loading...</td>
@@ -78,18 +86,17 @@ onMounted(() => { roomStore.index() });
                     <td class="text-center text-gray-500 h-15" colspan="11">No Data</td>
                 </tr>
                 <tr v-else v-for="billing in billingStore.billings" :key="billing.id">
-                    <td class="px-4 py-3 font-medium">{{ billing.tenant.first_name }} {{ billing.tenant.last_name }}</td>
+                    <td class="px-4 py-3 font-medium">{{ billing?.tenant?.first_name }} {{ billing?.tenant?.last_name }}</td>
                     <td class="px-4 py-3 font-medium">{{ billing.tenant.email }}</td>
+                    <td class="px-4 py-3 font-medium">{{ formatPrice(billing.rent) }}</td>
+                    <td class="px-4 py-3 font-medium">{{ billing.water }}</td>
+                    <td class="px-4 py-3 font-medium">{{ billing.electricity }}</td>
                     <td class="px-4 py-3 font-medium">{{ dayjs(billing.billing_period).format('MMMM YYYY') }}</td>
-                    <td class="px-4 py-3 font-medium">₱{{ billing.rent.toFixed(2) }}</td>
-                    <td class="px-4 py-3 font-medium">₱{{ billing.water.toFixed(2) }}</td>
-                    <td class="px-4 py-3 font-medium">₱{{ billing.electricity.toFixed(2) }}</td>
-                    <td class="px-4 py-3 font-medium">₱{{ billing.total.toFixed(2) }}</td>
                     <td class="px-4 py-3 font-medium">{{ dayjs(billing.due_date).format('MMMM D, YYYY') }}</td>
-                    <td class="px-4 py-3 font-medium">{{ billing.status }}</td>
                     <td class="px-4 py-3">
                         <StatusBadge :status="billing.status" item="billing" />
                     </td>
+                    <td class="px-4 py-3 text-red-500 font-bold">{{ formatPrice(billing.total) }}</td>
                     <td class="px-4 py-3 text-center space-x-2">
                         <ActionButtons
                             :item="billing"
@@ -100,12 +107,11 @@ onMounted(() => { roomStore.index() });
                     </td>
                     <td class="text-center">
                         <BaseButton
-                            class="block mx-auto"
                             variant="danger"
                             size="sm"
-                            @click="billingStore.sendInvoice(billing.id)"
+                            @click="openSendInvoice(tenant)"
                         >
-                            <UserMinusIcon class="size-4" />
+                            <InboxArrowDownIcon class="size-4" />
                         </BaseButton>
                     </td>
                 </tr>
@@ -139,15 +145,14 @@ onMounted(() => { roomStore.index() });
                 </div>
 
                 <div class="mt-3 text-sm space-y-1 text-gray-600">
-                    <p><strong>Tenant:</strong> {{ billing.first_name }} {{ billing.last_name }}</p>
-                    <p><strong>Tenant Email:</strong> {{ billing.email }}</p>
-                    <p><strong>Billing Period:</strong> {{ dayjs(billing.billing_period).format('MMMM D, YYYY') }}</p>
-                    <p><strong>Rent:</strong> {{ billing.rent }}</p>
+                    <p><strong>Tenant:</strong> {{ billing?.tenant?.first_name }} {{ billing?.tenant?.last_name }}</p>
+                    <p><strong>Tenant Email:</strong> {{ billing?.tenant?.email }}</p>
+                    <p><strong>Rent:</strong> {{ formatPrice(billing.rent) }}</p>
                     <p><strong>Water:</strong> {{ billing.water }}</p>
                     <p><strong>Electricity:</strong> {{ billing.electricity }}</p>
-                    <p><strong>Total:</strong> {{ billing.total }}</p>
-                    <p><strong>Due Date:</strong> {{ billing.due_date }}</p>
-                    <p><strong>Status:</strong> {{ billing.status }}</p>
+                    <p><strong>Billing Period:</strong> {{ dayjs(billing.billing_period).format('MMMM YYYY') }}</p>
+                    <p><strong>Due Date:</strong> {{ dayjs(billing.due_date).format('MMMM D, YYYY') }}</p>
+                    <p class="text-xl"><strong>Total:</strong> <b class="text-red-500">{{ formatPrice(billing.total) }}</b></p>
                 </div>
 
                 <div class="mt-4 flex gap-2 justify-end">
@@ -158,12 +163,11 @@ onMounted(() => { roomStore.index() });
                         @delete="openDeleteBilling(billing)"
                     />
                     <BaseButton
-                        class="block mx-auto"
                         variant="danger"
                         size="sm"
-                        @click="billingStore.sendInvoice(billing.id)"
+                        @click="openSendInvoice(tenant)"
                     >
-                        <UserMinusIcon class="size-4" />
+                        <InboxArrowDownIcon class="size-4" />
                     </BaseButton>
                 </div>
             </div>
@@ -194,7 +198,7 @@ onMounted(() => { roomStore.index() });
     <ConfirmDelete
         :isOpen="billingStore.isOpenDeleteModal"
         title="Delete Biling"
-        :message="`Delete billing ${billingStore.selectedTenant?.first_name} ${billingStore.selectedTenant?.last_name}?`"
+        :message="`Delete billing for ${billingStore.selectedBilling?.tenant?.first_name} ${billingStore.selectedBilling?.tenant?.last_name}?`"
         :loading="billingStore.isDeleteLoading"
         @confirm="confirmBillingDelete"
         @close="billingStore.isOpenDeleteModal = false"
