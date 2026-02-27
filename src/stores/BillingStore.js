@@ -11,12 +11,15 @@ export const useBillingStore = defineStore('billing', () => {
   const isFormLoading = ref(false);
   const isViewLoading = ref(false);
   const isDeleteLoading = ref(false);
+  const isSendInvoiceLoading = ref(false);
   const toastStore = useToastStore();
   const errors = ref({});
   const isOpenModal = ref(false);
   const isOpenDeleteModal = ref(false);
+  const isOpenSendInvoiceModal = ref(false);
   const currentMode = ref("Add");
   const selectedBilling = ref(null);
+  const selectedInvoice = ref(null);
   const roomStore = useRoomStore();
 
   /* =======================
@@ -25,7 +28,7 @@ export const useBillingStore = defineStore('billing', () => {
   const index = async () => {
     try {
       isListLoading.value = true;
-      const res = await api.get('/api/billings');
+      const res = await api.get('/billings');
       billings.value = res.data.result;
     } catch (error) {
       console.error(error);
@@ -41,7 +44,7 @@ export const useBillingStore = defineStore('billing', () => {
     try {
       isFormLoading.value = true;
 
-      const res = await api.post('/api/billings', data);
+      const res = await api.post('/billings', data);
       billings.value.unshift(res.data.result);
       toastStore.success(res.data.message);
       await roomStore.index();
@@ -67,7 +70,7 @@ export const useBillingStore = defineStore('billing', () => {
   const show = async (id, occupied) => {
     try {
       isViewLoading.value = true;
-      const res = await api.get(`/api/billings/${id}`);
+      const res = await api.get(`/billings/${id}`);
       viewData.value = res.data.result;
     } catch (error) {
       console.error(error);
@@ -83,7 +86,7 @@ export const useBillingStore = defineStore('billing', () => {
     try {
       isFormLoading.value = true;
 
-      const res = await api.put(`/api/billings/${id}`, data);
+      const res = await api.put(`/billings/${id}`, data);
 
       // sync local list
       const index = billings.value.findIndex(r => r.id === id);
@@ -116,7 +119,8 @@ export const useBillingStore = defineStore('billing', () => {
   const destroy = async (id) => {
     try {
       isDeleteLoading.value = true;
-      const res = await api.delete(`/api/billings/${id}`);
+      const res = await api.delete(`/billings/${id}`);
+
       toastStore.success(res.data.message);
       billings.value = billings.value.filter(r => r.id !== id);
       await roomStore.index();
@@ -132,11 +136,15 @@ export const useBillingStore = defineStore('billing', () => {
   ======================= */
   const sendInvoice  = async (id) => {
     try {
-      const res = await api.post(`/api/billings/${id}/send-invoice`);
-      
-      console.log(res.data);
+      isSendInvoiceLoading.value = true;
+      const res = await api.post(`/billings/${id}/send-invoice`);
+
+      toastStore.success(res.data.message);
+      await roomStore.index();
     } catch (error) {
       console.error(error);
+    } finally {
+      isSendInvoiceLoading.value = false;
     }
   }
 
@@ -175,6 +183,9 @@ export const useBillingStore = defineStore('billing', () => {
     isOpenDeleteModal,
     isDeleteLoading,
     sendInvoice,
-    selectedBilling
+    selectedBilling,
+    isSendInvoiceLoading,
+    isOpenSendInvoiceModal,
+    selectedInvoice
   }
 })

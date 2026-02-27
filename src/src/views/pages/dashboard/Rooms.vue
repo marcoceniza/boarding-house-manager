@@ -33,22 +33,11 @@ const openDeleteRoom = (room) => {
     roomStore.selectedRoom = room;
     roomStore.isOpenDeleteModal = true;
 }
+
 const confirmRoomDelete = async () => {
     await roomStore.destroy(roomStore.selectedRoom.id)
     roomStore.isOpenDeleteModal = false
 }
-const formatPrice = (price) => {
-    if (!price) return '0.00';
-
-    const number = parseFloat(price);
-
-    if (isNaN(number)) return '0.00';
-
-    return number.toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    });
-};
 </script>
 
 <template>
@@ -84,7 +73,7 @@ const formatPrice = (price) => {
                     <td class="px-4 py-3">{{ room.room_number }}</td>
                     <td class="px-4 py-3">{{ room.type }}</td>
                     <td class="px-4 py-3">{{ room.capacity }}</td>
-                    <td class="px-4 py-3">₱{{ formatPrice(room.price_per_month) }}</td>
+                    <td class="px-4 py-3">{{ room.price_per_month }}</td>
                     <td class="px-4 py-3">{{ room.occupied }}</td>
                     <td class="px-4 py-3">
                         <StatusBadge :status="room.status" />
@@ -133,7 +122,7 @@ const formatPrice = (price) => {
                 <div class="mt-3 text-sm space-y-1 text-gray-600">
                     <p><strong>Type:</strong> {{ room.type }}</p>
                     <p><strong>Capacity:</strong> {{ room.capacity }}</p>
-                    <p><strong>Price:</strong> ₱{{ formatPrice(room.price_per_month) }}</p>
+                    <p><strong>Price:</strong> {{ room.price_per_month }}</p>
                     <p><strong>Occupied:</strong> {{ room.occupied }}</p>
                 </div>
 

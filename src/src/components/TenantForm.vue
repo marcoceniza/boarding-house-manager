@@ -35,7 +35,7 @@ const options = {
 
 const roomOptions = computed(() => {
     return roomStore.rooms
-        .filter(room => Number(room.status) === 0 || room.id === formData.room_id)
+        .filter(room => room.status === 0 || room.id === formData.room_id)
         .map(room => ({
             label: room.room_number,
             value: room.id,

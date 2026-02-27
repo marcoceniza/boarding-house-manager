@@ -50,17 +50,12 @@ const confirmSendInvoice = async () => {
     billingStore.isOpenSendInvoiceModal = false;
 }
 const formatPrice = (price) => {
-    if (!price) return '0.00';
+    const numeric = price.toString().replace(/\D/g, '');
 
-    const number = parseFloat(price);
-
-    if (isNaN(number)) return '0.00';
-
-    return number.toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    });
-};
+    return numeric.length > 3
+        ? numeric.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+        : numeric;
+}
 
 onMounted( async () => {
     await roomStore.index();

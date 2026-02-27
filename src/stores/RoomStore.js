@@ -23,7 +23,7 @@ export const useRoomStore = defineStore('room', () => {
   const index = async () => {
     try {
       isListLoading.value = true;
-      const res = await api.get('/api/rooms');
+      const res = await api.get('/rooms');
       rooms.value = res.data.result;
     } catch (error) {
       console.error(error);
@@ -39,7 +39,7 @@ export const useRoomStore = defineStore('room', () => {
     try {
       isFormLoading.value = true;
 
-      const res = await api.post('/api/rooms', data);
+      const res = await api.post('/rooms', data);
       rooms.value.unshift(res.data.result);
       toastStore.success(res.data.message);
 
@@ -64,7 +64,7 @@ export const useRoomStore = defineStore('room', () => {
   const show = async (id) => {
     try {
       isViewLoading.value = true;
-      const res = await api.get(`/api/rooms/${id}`);
+      const res = await api.get(`/rooms/${id}`);
       viewData.value = res.data.result;
     } catch (error) {
       console.error(error);
@@ -80,7 +80,7 @@ export const useRoomStore = defineStore('room', () => {
     try {
       isFormLoading.value = true;
 
-      const res = await api.put(`/api/rooms/${id}`, data);
+      const res = await api.put(`/rooms/${id}`, data);
 
       // sync local list
       const index = rooms.value.findIndex(r => r.id === id);
@@ -112,7 +112,7 @@ export const useRoomStore = defineStore('room', () => {
   const destroy = async (id) => {
     try {
       isDeleteLoading.value = true;
-      const res = await api.delete(`/api/rooms/${id}`);
+      const res = await api.delete(`/rooms/${id}`);
       toastStore.success(res.data.message);
       rooms.value = rooms.value.filter(r => r.id !== id);
     } catch (error) {

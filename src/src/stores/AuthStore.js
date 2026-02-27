@@ -1,8 +1,8 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
+import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { useToastStore } from './toastStore';
-import api from '@/lib/axios';
 
 export const useAuthStore = defineStore('auth', () => {
   const isLoading = ref(false);
@@ -17,7 +17,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     try {
       isLoading.value = true;
-      const res = await api.post(`/${url}`, data);
+      const res = await axios.post(`/api/${url}`, data);
 
       if(url === 'login') {
         router.push('/dashboard');

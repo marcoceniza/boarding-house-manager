@@ -27,7 +27,7 @@ export const useTenantStore = defineStore('tenant', () => {
   const index = async () => {
     try {
       isListLoading.value = true;
-      const res = await api.get('/tenants');
+      const res = await api.get('/api/tenants');
       tenants.value = res.data.result;
     } catch (error) {
       console.error(error);
@@ -43,7 +43,7 @@ export const useTenantStore = defineStore('tenant', () => {
     try {
       isFormLoading.value = true;
 
-      const res = await api.post('/tenants', data);
+      const res = await api.post('/api/tenants', data);
       tenants.value.unshift(res.data.result);
       toastStore.success(res.data.message);
       await roomStore.index();
@@ -69,7 +69,7 @@ export const useTenantStore = defineStore('tenant', () => {
   const show = async (id, occupied) => {
     try {
       isViewLoading.value = true;
-      const res = await api.get(`/tenants/${id}`);
+      const res = await api.get(`/api/tenants/${id}`);
       viewData.value = res.data.result;
       getOccupied.value = occupied;
     } catch (error) {
@@ -86,7 +86,7 @@ export const useTenantStore = defineStore('tenant', () => {
     try {
       isFormLoading.value = true;
 
-      const res = await api.put(`/tenants/${id}`, data);
+      const res = await api.put(`/api/tenants/${id}`, data);
 
       // sync local list
       const index = tenants.value.findIndex(r => r.id === id);
@@ -119,7 +119,7 @@ export const useTenantStore = defineStore('tenant', () => {
   const destroy = async (id) => {
     try {
       isDeleteLoading.value = true;
-      const res = await api.delete(`/tenants/${id}`);
+      const res = await api.delete(`/api/tenants/${id}`);
       toastStore.success(res.data.message);
       tenants.value = tenants.value.filter(r => r.id !== id);
       await roomStore.index();
@@ -137,7 +137,7 @@ export const useTenantStore = defineStore('tenant', () => {
     try {
       isEndTenancyLoading.value = true;
 
-      const res = await api.post(`/tenants/${id}/end-tenancy`);
+      const res = await api.post(`/api/tenants/${id}/end-tenancy`);
 
       toastStore.success(res.data.message);
 

@@ -39,23 +39,13 @@ const options = {
 
 watch(() => formData.price_per_month, (newVal) => {
     if (!newVal) return;
+    let numeric = newVal.toString().replace(/,/g, '').replace(/\D/g, '');
 
-    let value = newVal.toString().replace(/,/g, '');
-
-    value = value.replace(/[^0-9.]/g, '');
-    const parts = value.split('.');
-    if (parts.length > 2) value = parts[0] + '.' + parts[1];
-
-    const number = parseFloat(value);
-    if (isNaN(number)) {
-        formData.price_per_month = '';
-        return;
+    if (numeric.length > 3) {
+        numeric = numeric.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     }
 
-    formData.price_per_month = number.toLocaleString('en-US', {
-        minimumFractionDigits: number % 1 === 0 ? 0 : 2,
-        maximumFractionDigits: 2
-    });
+    formData.price_per_month = numeric;
 }, { immediate: true });
 
 watch(() => roomStore.viewData, (room) => {
@@ -66,16 +56,12 @@ watch(() => roomStore.viewData, (room) => {
             formData.capacity = room.capacity ?? "";
 
             let price = room.price_per_month ?? "";
-
-            if (price !== "") {
-                const number = parseFloat(price);
-
-                formData.price_per_month = isNaN(number)
-                    ? ""
-                    : number.toLocaleString("en-US", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                    });
+            if (price) {
+                const numeric = price.toString().replace(/\D/g, '');
+                formData.price_per_month =
+                    numeric.length > 3
+                    ? numeric.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                    : numeric;
             } else {
                 formData.price_per_month = "";
             }

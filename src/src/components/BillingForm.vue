@@ -41,7 +41,7 @@ const tenantOptions = computed(() => {
     const billedTenantIds = billingStore.billings.map(b => b.tenant.id);
 
     return tenantStore.tenants
-        .filter(tenant => Number(tenant.status) === 1 &&
+        .filter(tenant => tenant.status === 1 &&
             (!billedTenantIds.includes(tenant.id) || tenant.id === formData.tenant_id)
         )
         .map(tenant => ({
@@ -55,34 +55,15 @@ const displayDueDate = computed(() => {
     return dayjs(formData.due_date).format('MMMM D, YYYY');
 });
 
-const formatCurrency = (value) => {
-    const number = parseFloat(value);
-    if (isNaN(number)) return "";
-    return number.toLocaleString("en-US", {
-        minimumFractionDigits: number % 1 === 0 ? 2 : 2, // keep 2 decimals for consistency with decimal(10,2)
-        maximumFractionDigits: 2,
-    });
-};
-
 watch(() => formData.rent, (newVal) => {
     if (!newVal) return;
+    let numeric = newVal.toString().replace(/,/g, '').replace(/\D/g, '');
 
-    let value = newVal.toString().replace(/,/g, '');
-
-    value = value.replace(/[^0-9.]/g, '');
-    const parts = value.split('.');
-    if (parts.length > 2) value = parts[0] + '.' + parts[1];
-
-    const number = parseFloat(value);
-    if (isNaN(number)) {
-        formData.rent = '';
-        return;
+    if (numeric.length > 3) {
+        numeric = numeric.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     }
 
-    formData.rent = number.toLocaleString('en-US', {
-        minimumFractionDigits: number % 1 === 0 ? 0 : 2,
-        maximumFractionDigits: 2
-    });
+    formData.rent = numeric;
 }, { immediate: true });
 
 watch(() => billingStore.viewData, (billing) => {
@@ -93,10 +74,12 @@ watch(() => billingStore.viewData, (billing) => {
         formData.billing_period = billing.billing_period ?? "";
 
         const rent = billing.tenant?.room?.price_per_month ?? 0;
-        formData.rent = formatCurrency(rent);
+        formData.rent = rent
+            ? rent.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+            : "";
 
-        formData.water = formatCurrency(billing.water ?? 0);
-        formData.electricity = formatCurrency(billing.electricity ?? 0);
+        formData.water = billing.water ?? 0;
+        formData.electricity = billing.electricity ?? 0;
 
         formData.due_date = billing.due_date
             ? dayjs(billing.due_date).format("YYYY-MM-DD")
@@ -105,6 +88,7 @@ watch(() => billingStore.viewData, (billing) => {
         formData.status = billing.status ?? 0;
 
     } else if (props.mode === "Create") {
+
         Object.keys(formData).forEach(k => formData[k] = "");
 
         formData.status = 0;
@@ -112,8 +96,6 @@ watch(() => billingStore.viewData, (billing) => {
         formData.billing_period = dayjs().format("YYYY-MM");
         formData.due_date = dayjs().format("YYYY-MM-DD");
         formData.rent = 0;
-        formData.water = 0;
-        formData.electricity = 0;
     }
 }, { immediate: true });
 
@@ -127,7 +109,10 @@ watch(() => formData.tenant_id, (tenantId) => {
 
     if (tenant?.room) {
         let rent = tenant.room.price_per_month ?? 0;
-        formData.rent = formatCurrency(rent);
+        const numeric = rent.toString().replace(/\D/g, '');
+        formData.rent = numeric.length > 3
+            ? numeric.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+            : numeric;
     } else {
         formData.rent = "";
     }

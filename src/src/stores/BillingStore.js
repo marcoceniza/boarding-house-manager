@@ -4,31 +4,32 @@ import api from '@/lib/axios';
 import { useToastStore } from './toastStore';
 import { useRoomStore } from './RoomStore';
 
-export const useTenantStore = defineStore('tenant', () => {
-  const tenants = ref([]);
+export const useBillingStore = defineStore('billing', () => {
+  const billings = ref([]);
   const viewData = ref(null);
   const isListLoading = ref(false);
   const isFormLoading = ref(false);
   const isViewLoading = ref(false);
   const isDeleteLoading = ref(false);
+  const isSendInvoiceLoading = ref(false);
   const toastStore = useToastStore();
   const errors = ref({});
   const isOpenModal = ref(false);
   const isOpenDeleteModal = ref(false);
+  const isOpenSendInvoiceModal = ref(false);
   const currentMode = ref("Add");
-  const selectedTenant = ref(null);
+  const selectedBilling = ref(null);
+  const selectedInvoice = ref(null);
   const roomStore = useRoomStore();
-  const isEndTenancyLoading = ref(false);
-  const getOccupied = ref('');
 
   /* =======================
-    Fetch all tenants
+    Fetch all billings
   ======================= */
   const index = async () => {
     try {
       isListLoading.value = true;
-      const res = await api.get('/tenants');
-      tenants.value = res.data.result;
+      const res = await api.get('/api/billings');
+      billings.value = res.data.result;
     } catch (error) {
       console.error(error);
     } finally {
@@ -37,14 +38,14 @@ export const useTenantStore = defineStore('tenant', () => {
   }
 
   /* =======================
-    Create tenant
+    Create billing
   ======================= */
   const store = async (data) => {
     try {
       isFormLoading.value = true;
 
-      const res = await api.post('/tenants', data);
-      tenants.value.unshift(res.data.result);
+      const res = await api.post('/api/billings', data);
+      billings.value.unshift(res.data.result);
       toastStore.success(res.data.message);
       await roomStore.index();
 
@@ -64,14 +65,13 @@ export const useTenantStore = defineStore('tenant', () => {
   }
 
   /* =======================
-    View single tenant
+    View single billing
   ======================= */
   const show = async (id, occupied) => {
     try {
       isViewLoading.value = true;
-      const res = await api.get(`/tenants/${id}`);
+      const res = await api.get(`/api/billings/${id}`);
       viewData.value = res.data.result;
-      getOccupied.value = occupied;
     } catch (error) {
       console.error(error);
     } finally {
@@ -80,18 +80,18 @@ export const useTenantStore = defineStore('tenant', () => {
   }
 
   /* =======================
-    Update tenant
+    Update billing
   ======================= */
   const update = async (id, data) => {
     try {
       isFormLoading.value = true;
 
-      const res = await api.put(`/tenants/${id}`, data);
+      const res = await api.put(`/api/billings/${id}`, data);
 
       // sync local list
-      const index = tenants.value.findIndex(r => r.id === id);
+      const index = billings.value.findIndex(r => r.id === id);
       if (index !== -1) {
-        tenants.value[index] = res.data.result;
+        billings.value[index] = res.data.result;
       }
 
       viewData.value = res.data.result;
@@ -114,14 +114,15 @@ export const useTenantStore = defineStore('tenant', () => {
   }
 
   /* =======================
-    Delete tenant
+    Delete billing
   ======================= */
   const destroy = async (id) => {
     try {
       isDeleteLoading.value = true;
-      const res = await api.delete(`/tenants/${id}`);
+      const res = await api.delete(`/api/billings/${id}`);
+
       toastStore.success(res.data.message);
-      tenants.value = tenants.value.filter(r => r.id !== id);
+      billings.value = billings.value.filter(r => r.id !== id);
       await roomStore.index();
     } catch (error) {
       console.error(error);
@@ -131,32 +132,21 @@ export const useTenantStore = defineStore('tenant', () => {
   }
 
   /* =======================
-    End tenancy
+    Send invoice
   ======================= */
-  const endTenancy = async (id) => {
+  const sendInvoice  = async (id) => {
     try {
-      isEndTenancyLoading.value = true;
-
-      const res = await api.post(`/tenants/${id}/end-tenancy`);
+      isSendInvoiceLoading.value = true;
+      const res = await api.post(`/api/billings/${id}/send-invoice`);
 
       toastStore.success(res.data.message);
-
-      // 🔄 Update tenant locally instead of removing
-      const index = tenants.value.findIndex(t => t.id === id);
-      if (index !== -1) {
-        tenants.value[index] = res.data.result;
-      }
-
-      // 🔄 Refresh rooms (since availability changed)
       await roomStore.index();
-
     } catch (error) {
       console.error(error);
-      toastStore.error('Failed to end tenancy');
     } finally {
-      isEndTenancyLoading.value = false;
+      isSendInvoiceLoading.value = false;
     }
-  };
+  }
 
   /* =======================
     Clear modal state
@@ -175,7 +165,7 @@ export const useTenantStore = defineStore('tenant', () => {
   index();
 
   return {
-    tenants,
+    billings,
     viewData,
     index,
     store,
@@ -186,15 +176,16 @@ export const useTenantStore = defineStore('tenant', () => {
     clearErrors,
     isOpenModal,
     currentMode,
-    selectedTenant,
     isListLoading,
     isViewLoading,
     isFormLoading,
     destroy,
     isOpenDeleteModal,
     isDeleteLoading,
-    endTenancy,
-    isEndTenancyLoading,
-    getOccupied
+    sendInvoice,
+    selectedBilling,
+    isSendInvoiceLoading,
+    isOpenSendInvoiceModal,
+    selectedInvoice
   }
 })
