@@ -222,7 +222,7 @@ onMounted( async () => {
     <ConfirmSendInvoice
         :isOpen="billingStore.isOpenSendInvoiceModal"
         title="Send Invoice"
-        :message="billingStore.selectedInvoice"
+        :message="billingStore?.selectedInvoice ?? {}"
         :loading="billingStore.isSendInvoiceLoading"
         @confirm="confirmSendInvoice"
         @close="billingStore.isOpenSendInvoiceModal = false"

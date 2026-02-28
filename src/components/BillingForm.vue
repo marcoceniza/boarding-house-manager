@@ -38,7 +38,7 @@ const months = computed(() => {
 });
 
 const tenantOptions = computed(() => {
-    const billedTenantIds = billingStore.billings.map(b => b.tenant.id);
+    const billedTenantIds = billingStore.billings.map(b => b.tenant_id);
 
     return tenantStore.tenants
         .filter(tenant => Number(tenant.status) === 1 &&
@@ -94,15 +94,14 @@ watch(() => billingStore.viewData, (billing) => {
 
         const rent = billing.tenant?.room?.price_per_month ?? 0;
         formData.rent = formatCurrency(rent);
-
         formData.water = formatCurrency(billing.water ?? 0);
         formData.electricity = formatCurrency(billing.electricity ?? 0);
-
         formData.due_date = billing.due_date
             ? dayjs(billing.due_date).format("YYYY-MM-DD")
             : null;
-
         formData.status = billing.status ?? 0;
+        formData.created_at = dayjs(billing.created_at).format("MMM D, YYYY • h:mm A") ?? "";
+        formData.updated_at = dayjs(billing.updated_at).format("MMM D, YYYY • h:mm A") ?? "";
 
     } else if (props.mode === "Create") {
         Object.keys(formData).forEach(k => formData[k] = "");
@@ -153,7 +152,6 @@ const submitForm = async () => {
 
 onMounted( async () => {
     await roomStore.index();
-    await billingStore.index();
     await tenantStore.index();
 });
 </script>
@@ -210,6 +208,18 @@ onMounted( async () => {
             @update:model-value="val => formData.due_date = val"
             :disabled="isDisabled"
             :error="billingStore.errors?.due_date?.[0]"
+        />
+        <BaseInput
+            v-if="props.mode === 'View'"
+            label="Created at"
+            v-model="formData.created_at"
+            :disabled="props.mode === 'Create' || isDisabled"
+        />
+        <BaseInput
+            v-if="props.mode === 'View'"
+            label="Updated at"
+            v-model="formData.updated_at"
+            :disabled="props.mode === 'Create' || isDisabled"
         />
 
         <div v-if="props.mode !== 'View'" class="flex justify-end w-full gap-2 pt-4">

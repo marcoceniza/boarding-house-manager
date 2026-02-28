@@ -129,7 +129,7 @@ class BillingController extends Controller
         Mail::to($tenantEmail)->send(new InvoiceMail($billing));
 
         return response()->json([
-            'message' => 'Test invoice sent successfully'
+            'message' => 'Invoice sent successfully'
         ]);
     }
 }

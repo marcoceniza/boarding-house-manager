@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 
 const props = defineProps({
-    status: { type: Number, required: true },
+    status: { type: String, required: true },
     item: { type: String, default: 'room' },
 })
 

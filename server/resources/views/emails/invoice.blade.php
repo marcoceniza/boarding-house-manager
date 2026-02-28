@@ -2,11 +2,11 @@
 
 <p>
     Please find attached your invoice for
-    <strong>{{ $billing->billing_period->format('F Y') }}</strong>.
+    <strong>{{ $periodFormatted }}</strong>.
 </p>
 
 <p>
-    <strong>Amount Due:</strong> ₱{{ number_format($billing->amount, 2) }}<br>
+    <strong>Amount Due:</strong> ₱{{ number_format($billing->total, 2) }}<br>
     <strong>Due Date:</strong>
     {{ optional($billing->due_date)->format('F d, Y') }}
 </p>

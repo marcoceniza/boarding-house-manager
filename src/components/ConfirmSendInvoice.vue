@@ -13,7 +13,7 @@ const emit = defineEmits(['confirm', 'close']);
 const close = () => emit('close');
 
 const formatPrice = (price) => {
-    const numeric = price.toString().replace(/\D/g, '');
+    const numeric = price.toString().replace(/[^0-9.]/g, '');
 
     return numeric.length > 3
         ? numeric.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
@@ -41,7 +41,7 @@ const formatPrice = (price) => {
             </p>
 
             <p class="text-lg text-gray-600 whitespace-pre-line">
-                <strong>Total:</strong> <span class="text-red-600 font-bold">{{ formatPrice(message.total) }}</span>
+                <strong>Total:</strong> <span class="text-red-600 font-bold">₱{{ formatPrice(message.total) }}</span>
             </p>
 
             <div class="flex justify-end gap-2 mt-6">

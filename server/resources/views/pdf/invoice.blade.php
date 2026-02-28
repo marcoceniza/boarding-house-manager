@@ -132,9 +132,9 @@
                 <tr>
                     <th>Tenant</th>
                     <th>Billing Period</th>
-                    <th>Rent (₱)</th>
-                    <th>Water (₱)</th>
-                    <th>Electricity (₱)</th>
+                    <th>Rent</th>
+                    <th>Water</th>
+                    <th>Electricity</th>
                 </tr>
                 <tr>
                     <td>{{ $tenantName }}</td>

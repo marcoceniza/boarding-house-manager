@@ -73,6 +73,10 @@ class RoomController extends Controller
     {
         $room = Room::findOrFail($id);
 
+        $request->merge([
+            'price_per_month' => str_replace(',', '', $request->price_per_month),
+        ]);
+
         // Status => 0 = Available, 1 = Occupied, 2 = Maintenance
         $validated = $request->validate([
             'room_number'     => 'required|string|max:10|unique:rooms,room_number,' . $room->id,
