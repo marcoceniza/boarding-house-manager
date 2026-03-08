@@ -5,6 +5,7 @@ import Tenants from '@/views/pages/dashboard/Tenants.vue'
 import Rooms from '@/views/pages/dashboard/Rooms.vue'
 import Billings from '@/views/pages/dashboard/Billings.vue'
 import Profile from '@/views/pages/dashboard/Profile.vue'
+import { useAuthStore } from '@/stores/AuthStore'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -12,6 +13,7 @@ const router = createRouter({
     {
       path: '/dashboard',
       component: DashboardLayout,
+      meta: { requiresAuth: true },
       children: [
         { path: '', name: 'Dashboard', component: DashboardHome },
         { path: 'rooms', name: 'Rooms', component: Rooms },
@@ -24,30 +26,40 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: () => import('../views/pages/Login.vue'),
+      meta: { guest: true },
     },
     {
       path: '/register',
       name: 'register',
       component: () => import('../views/pages/Register.vue'),
+      meta: { guest: true },
     },
   ],
-})
+});
 
-// Global auth/guest guard
-router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('token')
-  const publicPages = ['login', 'register']
-  const authRequired = !publicPages.includes(to.name)
+router.beforeEach(async (to, from, next) => {
+  const authStore = useAuthStore();
 
-  if (authRequired && !token) {
-    return next({ name: 'login' })
+  if (!authStore.user) {
+    try {
+      await authStore.getUser();
+    } catch (error) {
+      console.warn("User check failed");
+    }
   }
 
-  if (token && publicPages.includes(to.name)) {
-    return next({ name: 'Dashboard' })
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+  const guestOnly = to.matched.some(record => record.meta.guest);
+
+  if (requiresAuth && !authStore.user) {
+    return next({ name: 'login' });
   }
 
-  next()
-})
+  if (guestOnly && authStore.user) {
+    return next({ name: 'Dashboard' });
+  }
+
+  next();
+});
 
 export default router
