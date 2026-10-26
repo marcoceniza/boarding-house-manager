@@ -4,38 +4,7 @@
 # Shared (monorepo) rules + MOBILE-specific rules.
 # ============================================================
 
-# --- Shared / monorepo rules (also in the root .gitignore) ---
 
-# Dependencies
-node_modules/
-vendor/
-
-# Environment & secrets
-.env
-.env.backup
-.env.production
-
-# Generated config files
-AGENTS.md
-boost.json
-opencode.json
-
-# Editor / IDE
-.fleet
-.idea
-.nova
-.vscode
-.zed
-.agents
-.amp
-.claude
-.cursor
-.factory
-.grok
-.junie
-.kiro
-.pi
-.mcp.json
 
 # --- MOBILE (Expo / React Native) ---
 
