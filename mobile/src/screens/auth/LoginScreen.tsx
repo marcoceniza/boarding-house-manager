@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, Text } from 'react-native';
 
 import type { LoginHandler } from '@/types';
 import { ActionButton } from '@/components/ui/ActionButton';
@@ -71,11 +71,11 @@ export default function LoginScreen({
         className="mt-1"
       />
       <Pressable onPress={onNavigateToRegister} className="items-center py-[19px]">
-        <Text className="text-sm leading-[22px] text-secondary">
+        <Text className="text-base leading-[22px] text-secondary">
           New resident moving in? <Text className="font-extrabold text-green">Register here</Text>
         </Text>
       </Pressable>
-      <Text className="mt-1 text-center text-xs text-muted">Resident Portal · Haven House Mobile Prototype</Text>
+      <Text className="text-center text-sm text-muted">Resident Portal · Haven House Mobile Prototype</Text>
     </AuthLayout>
   );
 }

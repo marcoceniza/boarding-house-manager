@@ -21,7 +21,7 @@ export function Field({
 }) {
   return (
     <View className="mb-3.5">
-      <Text className="mb-1.5 text-sm font-bold text-slate-700">{label}</Text>
+      <Text className="mb-1.5 text-lg font-bold text-slate-700">{label}</Text>
       <View>
         <TextInput
           autoCapitalize={autoCapitalize}
@@ -31,12 +31,12 @@ export function Field({
           placeholder={placeholder}
           placeholderTextColor="#94a3b8"
           secureTextEntry={secureTextEntry}
-          className={`rounded-xl border border-line bg-surface px-[13px] py-3 text-sm text-ink ${rightAction ? 'pr-[58px]' : ''}`}
+          className={`rounded-xl border border-line bg-surface px-[13px] py-3 text-base text-ink ${rightAction ? 'pr-[58px]' : ''}`}
           value={value}
         />
         {rightAction ? (
           <Pressable onPress={rightAction.onPress} className="absolute bottom-0 right-[13px] top-0 justify-center">
-            <Text className="text-xs font-bold text-secondary">{rightAction.label}</Text>
+            <Text className="text-sm font-bold text-secondary">{rightAction.label}</Text>
           </Pressable>
         ) : null}
       </View>

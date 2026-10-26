@@ -41,7 +41,7 @@
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                         </svg>
-                        Confirm email &amp; create account
+                        Confirm email and create account
                     </button>
                 </form>
 

@@ -24,9 +24,9 @@ export default function AuthLayout({
         <View className="mb-3.5 h-16 w-16 self-center items-center justify-center rounded-[22px] bg-green">
           <Text className="text-[30px] font-black text-surface">H</Text>
         </View>
-        <Text className="text-center text-[26px] font-black text-ink">Haven House</Text>
-        <Text className="mt-0.5 text-center text-[11px] font-extrabold tracking-[2px] text-green">TENANT PORTAL</Text>
-        <Text className="mb-5 mt-3 text-center text-sm leading-[21px] text-secondary">{intro}</Text>
+        <Text className="text-center text-[30px] font-black text-ink">Haven House</Text>
+        <Text className="mt-0.5 text-center text-[13px] font-extrabold tracking-[2px] text-green">TENANT PORTAL</Text>
+        <Text className="mb-5 mt-3 text-center text-[15px] leading-[21px] text-secondary">{intro}</Text>
         {children}
       </ScrollView>
     </KeyboardAvoidingView>

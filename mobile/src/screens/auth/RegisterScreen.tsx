@@ -95,7 +95,7 @@ export default function RegisterScreen({
         className="mt-1"
       />
       <Pressable onPress={onNavigateToLogin} className="items-center py-[19px]">
-        <Text className="text-sm leading-[22px] text-secondary">
+        <Text className="text-base leading-[22px] text-secondary">
           Already have an account? <Text className="font-extrabold text-green">Sign in</Text>
         </Text>
       </Pressable>
