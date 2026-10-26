@@ -21,7 +21,7 @@ export function Field({
 }) {
   return (
     <View className="mb-3.5">
-      <Text className="mb-1.5 text-xs font-bold text-slate-700">{label}</Text>
+      <Text className="mb-1.5 text-sm font-bold text-slate-700">{label}</Text>
       <View>
         <TextInput
           autoCapitalize={autoCapitalize}
@@ -36,7 +36,7 @@ export function Field({
         />
         {rightAction ? (
           <Pressable onPress={rightAction.onPress} className="absolute bottom-0 right-[13px] top-0 justify-center">
-            <Text className="text-[11px] font-bold text-secondary">{rightAction.label}</Text>
+            <Text className="text-xs font-bold text-secondary">{rightAction.label}</Text>
           </Pressable>
         ) : null}
       </View>

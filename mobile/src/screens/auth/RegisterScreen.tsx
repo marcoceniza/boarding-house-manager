@@ -58,9 +58,9 @@ export default function RegisterScreen({
 
   return (
     <AuthLayout intro="Register using the email address on your active tenancy record. We’ll send a verification link before you can sign in.">
-      {error ? <Text className="mb-3 rounded-xl bg-red-light p-3 text-xs leading-[18px] text-red">{error}</Text> : null}
+      {error ? <Text className="mb-3 rounded-xl bg-red-light p-3 text-sm leading-[22px] text-red">{error}</Text> : null}
       {registered ? (
-        <Text className="mb-3 rounded-xl bg-green p-3 text-xs leading-[18px] text-surface">
+        <Text className="mb-3 rounded-xl bg-green p-3 text-sm leading-[22px] text-surface">
           If your email matches an active tenant record, a verification link has been sent. Check your inbox, verify your email, then sign in.
         </Text>
       ) : null}
@@ -95,7 +95,7 @@ export default function RegisterScreen({
         className="mt-1"
       />
       <Pressable onPress={onNavigateToLogin} className="items-center py-[19px]">
-        <Text className="text-xs leading-[18px] text-secondary">
+        <Text className="text-sm leading-[22px] text-secondary">
           Already have an account? <Text className="font-extrabold text-green">Sign in</Text>
         </Text>
       </Pressable>

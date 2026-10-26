@@ -46,7 +46,7 @@ export default function LoginScreen({
 
   return (
     <AuthLayout intro="Welcome home! Access your room lease, monthly statements, and utility records anytime.">
-      {error ? <Text className="mb-3 rounded-xl bg-red-light p-3 text-xs leading-[18px] text-red">{error}</Text> : null}
+      {error ? <Text className="mb-3 rounded-xl bg-red-light p-3 text-sm leading-[22px] text-red">{error}</Text> : null}
       <Field
         autoCapitalize="none"
         keyboardType="email-address"
@@ -71,11 +71,11 @@ export default function LoginScreen({
         className="mt-1"
       />
       <Pressable onPress={onNavigateToRegister} className="items-center py-[19px]">
-        <Text className="text-xs leading-[18px] text-secondary">
+        <Text className="text-sm leading-[22px] text-secondary">
           New resident moving in? <Text className="font-extrabold text-green">Register here</Text>
         </Text>
       </Pressable>
-      <Text className="mt-1 text-center text-[11px] text-muted">Resident Portal · Haven House Mobile Prototype</Text>
+      <Text className="mt-1 text-center text-xs text-muted">Resident Portal · Haven House Mobile Prototype</Text>
     </AuthLayout>
   );
 }
