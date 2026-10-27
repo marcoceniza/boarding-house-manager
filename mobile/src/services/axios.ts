@@ -2,7 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create, type AxiosInstance } from 'axios';
 
 // API base URL - replace with your actual API endpoint
-const API_BASE_URL = 'http://192.168.254.123:8000/api/v1';
+// const API_BASE_URL = 'http://192.168.254.123:8001/api/v1';
+const API_BASE_URL = 'https://evidence-emissions-alabama-paris.trycloudflare.com/api/v1';
 
 // Create axios instance with default configuration
 const apiClient: AxiosInstance = create({

@@ -59,8 +59,14 @@ export interface ResidentSession {
   bills: Bill[];
 }
 
+
+export type RegisterHandler = (
+  email: string,
+  password: string,
+  passwordConfirmation: string,
+) => Promise<void>;
+
 export type LoginHandler = (email: string, password: string) => Promise<string | null>;
-export type RegisterHandler = (email: string, password: string) => Promise<void>;
 export type BillSelectionHandler = (bill: Bill) => void;
 export type ResidentProfileUpdates = Pick<Tenant, 'firstName' | 'lastName' | 'phone' | 'emergencyContact'>;
 export type ResidentProfileUpdateHandler = (updates: ResidentProfileUpdates) => void;

@@ -47,7 +47,7 @@ export default function HistoryScreen({
             key={item.key}
             onPress={() => setFilter(item.key)}
             className={`min-h-[38px] flex-1 items-center justify-center rounded-xl px-1 ${filter === item.key ? 'bg-surface' : ''}`}>
-            <Text className={`text-[11px] font-bold text-secondary ${filter === item.key ? 'text-ink' : ''}`}>
+            <Text className={`text-base font-bold text-secondary ${filter === item.key ? 'text-ink' : ''}`}>
               {item.label}  {item.count}
             </Text>
           </Pressable>
@@ -57,8 +57,8 @@ export default function HistoryScreen({
         shownBills.map((bill) => <BillCard bill={bill} key={bill.id} onOpen={onOpenBill} />)
       ) : (
         <Surface className="items-center gap-2.5 py-[25px]">
-          <Text className="text-base font-extrabold text-ink">No bills found</Text>
-          <Text className="text-xs leading-[18px] text-secondary">
+          <Text className="text-lg font-extrabold text-ink">No bills found</Text>
+          <Text className="text-base leading-[18px] text-secondary">
             {filter === 'paid'
               ? 'No bills have been marked as paid yet.'
               : 'There are no unpaid or overdue bills.'}

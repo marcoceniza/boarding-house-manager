@@ -13,13 +13,17 @@ export function ActionButton({
   disabled?: boolean;
   className?: string;
 }) {
+  const containerVariant = secondary ? 'border border-line bg-soft' : 'bg-green';
+  const textVariant = secondary ? 'text-slate-700' : 'text-surface';
+  const disabledClass = disabled ? 'opacity-50' : '';
+
   return (
     <Pressable
       accessibilityRole="button"
       disabled={disabled}
       onPress={onPress}
-      className={`min-h-[46px] items-center justify-center rounded-[13px] px-[15px] ${secondary ? 'border border-line bg-soft' : 'bg-green'} active:opacity-80 ${disabled ? 'opacity-50' : ''} ${className}`}>
-      <Text className={`text-base font-extrabold text-surface ${secondary ? 'text-slate-700' : ''}`}>
+      className={`min-h-[46px] items-center justify-center rounded-[13px] px-[15px] ${containerVariant} active:opacity-80 ${disabledClass} ${className}`}>
+      <Text className={`text-base font-extrabold ${textVariant}`}>
         {label}
       </Text>
     </Pressable>

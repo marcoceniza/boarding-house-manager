@@ -55,29 +55,29 @@ export default function ProfileScreen({
       <Surface>
         <View className="flex-row items-center gap-3">
           <View className="h-[54px] w-[54px] items-center justify-center rounded-[18px] bg-green">
-            <Text className="text-[19px] font-black text-surface">
+            <Text className="text-2xl font-black text-surface">
               {tenant.firstName[0]}
               {tenant.lastName[0]}
             </Text>
           </View>
           <View className="flex-1">
-            <Text className="text-base font-extrabold text-ink">{tenant.firstName} {tenant.lastName}</Text>
-            <Text className="text-xs leading-[18px] text-secondary">{tenant.email}</Text>
-            <Text className="mt-1 text-[10px] font-extrabold text-green">● Active resident</Text>
+            <Text className="text-lg font-extrabold text-ink">{tenant.firstName} {tenant.lastName}</Text>
+            <Text className="text-base leading-[18px] text-secondary">{tenant.email}</Text>
+            <Text className="mt-1 text-sm font-extrabold text-green">● Active resident</Text>
           </View>
           <Pressable onPress={openEdit} className="rounded-[10px] bg-soft px-[11px] py-2">
-            <Text className="text-[11px] font-bold text-secondary">Edit</Text>
+            <Text className="text-base font-bold text-secondary">Edit</Text>
           </Pressable>
         </View>
         <View className="mt-3.5 gap-2 border-t border-soft pt-3">
-          <Text className="text-xs leading-[18px] text-secondary">Mobile: {tenant.phone}</Text>
-          <Text className="text-xs leading-[18px] text-secondary">Emergency: {tenant.emergencyContact}</Text>
+          <Text className="text-base leading-[18px] text-secondary">Mobile: {tenant.phone}</Text>
+          <Text className="text-base leading-[18px] text-secondary">Emergency: {tenant.emergencyContact}</Text>
         </View>
       </Surface>
 
       <View className="mt-0.5 flex-row items-center justify-between gap-2">
-        <Text className="text-base font-extrabold text-ink">Room & tenancy details</Text>
-        <Text className="mt-0.5 text-xs leading-[18px] text-secondary">Admin managed</Text>
+        <Text className="text-lg font-extrabold text-ink">Room & tenancy details</Text>
+        <Text className="mt-0.5 text-base leading-[18px] text-secondary">Admin managed</Text>
       </View>
       <Surface>
         <InfoRow label="Assigned room" value={tenant.roomNumber} />
@@ -94,8 +94,8 @@ export default function ProfileScreen({
       <Modal animationType="fade" onRequestClose={() => setEditing(false)} transparent visible={editing}>
         <View className="flex-1 justify-end bg-[#0f172a99]" style={{ paddingBottom: Math.max(insets.bottom, 12) }}>
           <View className="m-[18px] gap-3 rounded-[22px] bg-surface p-[18px]">
-            <Text className="text-[19px] font-black text-ink">Edit resident details</Text>
-            <Text className="text-xs leading-[18px] text-secondary">
+            <Text className="text-2xl font-black text-ink">Edit resident details</Text>
+            <Text className="text-base leading-[18px] text-secondary">
               Room leases and billing records cannot be changed here.
             </Text>
             <View className="flex-row gap-2.5">

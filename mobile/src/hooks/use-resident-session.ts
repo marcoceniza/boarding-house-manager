@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
 
 import type { ResidentSession } from '@/types';
+import { mapApiBillToBill } from '@/utils/billing';
 import { apiService } from '@/services/api';
 
 export const RESIDENT_SESSION_KEY = 'haven_house_resident_session';
@@ -20,24 +21,23 @@ export function useResidentSession() {
       .then(async (saved) => {
         if (active && saved) {
           const restored = JSON.parse(saved) as Partial<ResidentSession>;
-          setSession({
+          const restoredSession: ResidentSession = {
             isAuthenticated: restored.isAuthenticated ?? false,
             tenant: restored.tenant ?? { id: '', firstName: '', lastName: '', email: '', phone: '', emergencyContact: '', moveInDate: '', tenancyStatus: 'pending', roomNumber: '' },
             bills: restored.bills ?? [],
-          });
-        } else {
-          // Load initial data from API
-          try {
-            const dashboard = await apiService.dashboard.getDashboard();
-            if (active) {
-              setSession({
-                isAuthenticated: false,
-                tenant: dashboard.tenant,
-                bills: dashboard.bills,
-              });
+          };
+          setSession(restoredSession);
+          // Re-fetch bills from API when the session is authenticated to pick up new billings
+          if (restoredSession.isAuthenticated) {
+            try {
+              const billsResponse = await apiService.billing.getBillingHistory();
+              const freshBills = (billsResponse.data ?? []).map(mapApiBillToBill);
+              if (active) {
+                setSession((current) => ({ ...current, bills: freshBills }));
+              }
+            } catch (error) {
+              console.error('Unable to refresh bills from API.', error);
             }
-          } catch (error) {
-            console.error('Unable to load initial session data from API.', error);
           }
         }
       })

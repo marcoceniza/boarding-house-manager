@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import BillDetailsModal from '@/components/BillDetailsModal';
 import { BottomBar } from '@/components/ui/BottomBar';
 import type { Bill } from '@/types';
-import { getBillStatus } from '@/utils/billing';
+import { getBillStatus, mapApiBillToBill } from '@/utils/billing';
 import AuthScreen from '@/screens/auth/AuthScreen';
 import HomeScreen from '@/screens/tabs/HomeScreen';
 import { useResidentSession } from '@/hooks/use-resident-session';
@@ -22,6 +22,8 @@ export default function IndexRoute() {
       await apiService.token.set(response.data.token);
       const profile = await apiService.auth.getCurrentUser();
       const tenant = profile.data;
+      const billsResponse = await apiService.billing.getBillingHistory();
+      const bills = (billsResponse.data ?? []).map(mapApiBillToBill);
       setSession((current) => ({
         ...current,
         isAuthenticated: true,
@@ -36,6 +38,7 @@ export default function IndexRoute() {
           tenancyStatus: tenant.status === 1 && !tenant.ended_at ? 'active' : 'ended',
           roomNumber: tenant.room?.room_number ?? '',
         },
+        bills,
       }));
       router.replace('/');
       return null;
@@ -67,8 +70,8 @@ export default function IndexRoute() {
             <View className="flex-row items-center gap-2">
               <View className="h-[34px] w-[34px] items-center justify-center rounded-[11px] bg-green"><Text className="text-base font-black text-surface">H</Text></View>
               <View>
-                <Text className="text-sm font-extrabold text-ink">Haven House</Text>
-                <Text className="mt-px text-[10px] text-secondary">Resident portal</Text>
+                <Text className="text-xl font-extrabold text-ink">Haven House</Text>
+                <Text className="text-sm text-secondary">Resident portal</Text>
               </View>
             </View>
           </View>
