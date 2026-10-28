@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['first_name', 'last_name', 'email', 'room_id', 'move_in_date', 'status', 'ended_at'])]
+#[Fillable(['first_name', 'last_name', 'email', 'phone', 'emergency_contact', 'room_id', 'move_in_date', 'status', 'ended_at'])]
 class Tenant extends Model
 {
     protected $casts = [

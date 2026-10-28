@@ -28,6 +28,7 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
     Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('/logout', [AuthenticationController::class, 'destroy'])->name('logout');
         Route::get('/me', [ProfileController::class, 'show'])->name('me.show');
+        Route::patch('/me', [ProfileController::class, 'update'])->name('me.update');
         Route::get('/me/dashboard', DashboardController::class)->name('me.dashboard');
         Route::get('/me/billings', [BillingController::class, 'index'])->name('me.billings.index');
     });

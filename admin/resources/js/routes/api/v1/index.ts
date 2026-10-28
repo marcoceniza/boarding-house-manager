@@ -3,7 +3,7 @@ import register702019 from './register'
 import me from './me'
 /**
 * @see \App\Http\Controllers\Api\Auth\TenantRegistrationController::register
- * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:21
+ * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:22
  * @route '/api/v1/register'
  */
 export const register = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -18,7 +18,7 @@ register.definition = {
 
 /**
 * @see \App\Http\Controllers\Api\Auth\TenantRegistrationController::register
- * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:21
+ * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:22
  * @route '/api/v1/register'
  */
 register.url = (options?: RouteQueryOptions) => {
@@ -27,7 +27,7 @@ register.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Api\Auth\TenantRegistrationController::register
- * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:21
+ * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:22
  * @route '/api/v1/register'
  */
 register.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -37,7 +37,7 @@ register.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
     /**
 * @see \App\Http\Controllers\Api\Auth\TenantRegistrationController::register
- * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:21
+ * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:22
  * @route '/api/v1/register'
  */
     const registerForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -47,7 +47,7 @@ register.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
             /**
 * @see \App\Http\Controllers\Api\Auth\TenantRegistrationController::register
- * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:21
+ * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:22
  * @route '/api/v1/register'
  */
         registerForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

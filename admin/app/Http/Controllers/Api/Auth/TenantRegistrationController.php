@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Notifications\TenantRegistrationVerification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
@@ -57,13 +58,17 @@ class TenantRegistrationController extends Controller
             ];
         });
 
-        if ($notification) {
-            Notification::route('mail', $notification['email'])
-                ->notify(new TenantRegistrationVerification($notification['token']));
+        if (! $notification) {
+            return response()->json([
+                'message' => 'No active tenant record was found for this email. Please use the email your landlord registered for you.',
+            ], 422);
         }
 
+        Notification::route('mail', $notification['email'])
+            ->notify(new TenantRegistrationVerification($notification['token']));
+
         return response()->json([
-            'message' => 'If your email matches an active tenant record, a verification link has been sent.',
+            'message' => 'A verification link has been sent to your email. Please check your inbox to complete registration.',
         ], 202);
     }
 
@@ -74,7 +79,7 @@ class TenantRegistrationController extends Controller
         ]);
     }
 
-    public function confirm(string $token): JsonResponse
+    public function confirm(string $token): Response
     {
         $user = DB::transaction(function () use ($token): ?User {
             $registration = TenantRegistration::query()
@@ -121,20 +126,9 @@ class TenantRegistrationController extends Controller
         });
 
         if (! $user) {
-            return response()->json([
-                'message' => 'This registration link is invalid, expired, or no longer available.',
-            ], 410);
+            return response(view('api.tenant-registration-failed'), 410);
         }
 
-        return response()->json([
-            'message' => 'Email verified. You can now sign in.',
-            'data' => [
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                ],
-            ],
-        ]);
+        return response(view('api.tenant-registration-confirmed'));
     }
 }

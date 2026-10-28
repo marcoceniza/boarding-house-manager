@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, Text } from 'react-native';
 
 import type { RegisterHandler } from '@/types';
 import { ActionButton } from '@/components/ui/ActionButton';
@@ -93,8 +93,8 @@ export default function RegisterScreen({
 
       {registered ? (
         <Text className="mb-3 rounded-xl bg-green p-3 text-sm text-surface">
-          If your email matches an active tenant record, a verification
-          link has been sent. Check your inbox and verify your email.
+          A verification link has been sent to your email. Check your
+          inbox and tap the link to complete registration.
         </Text>
       ) : null}
 

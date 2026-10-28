@@ -28,6 +28,16 @@ export const apiService = {
       const response = await apiClient.get('/me');
       return response.data;
     },
+
+    updateProfile: async (data: {
+      first_name: string;
+      last_name: string;
+      phone: string;
+      emergency_contact: string;
+    }) => {
+      const response = await apiClient.patch('/me', data);
+      return response.data;
+    },
   },
 
   // Dashboard endpoints

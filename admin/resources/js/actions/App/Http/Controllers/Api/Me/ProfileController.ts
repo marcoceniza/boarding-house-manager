@@ -77,6 +77,71 @@ show.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
         })
     
     show.form = showForm
-const ProfileController = { show }
+/**
+* @see \App\Http\Controllers\Api\Me\ProfileController::update
+ * @see app/Http/Controllers/Api/Me/ProfileController.php:28
+ * @route '/api/v1/me'
+ */
+export const update = (options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+    url: update.url(options),
+    method: 'patch',
+})
+
+update.definition = {
+    methods: ["patch"],
+    url: '/api/v1/me',
+} satisfies RouteDefinition<["patch"]>
+
+/**
+* @see \App\Http\Controllers\Api\Me\ProfileController::update
+ * @see app/Http/Controllers/Api/Me/ProfileController.php:28
+ * @route '/api/v1/me'
+ */
+update.url = (options?: RouteQueryOptions) => {
+    return update.definition.url + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\Api\Me\ProfileController::update
+ * @see app/Http/Controllers/Api/Me/ProfileController.php:28
+ * @route '/api/v1/me'
+ */
+update.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+    url: update.url(options),
+    method: 'patch',
+})
+
+    /**
+* @see \App\Http\Controllers\Api\Me\ProfileController::update
+ * @see app/Http/Controllers/Api/Me/ProfileController.php:28
+ * @route '/api/v1/me'
+ */
+    const updateForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        action: update.url({
+                    [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                        _method: 'PATCH',
+                        ...(options?.query ?? options?.mergeQuery ?? {}),
+                    }
+                }),
+        method: 'post',
+    })
+
+            /**
+* @see \App\Http\Controllers\Api\Me\ProfileController::update
+ * @see app/Http/Controllers/Api/Me/ProfileController.php:28
+ * @route '/api/v1/me'
+ */
+        updateForm.patch = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: update.url({
+                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                            _method: 'PATCH',
+                            ...(options?.query ?? options?.mergeQuery ?? {}),
+                        }
+                    }),
+            method: 'post',
+        })
+    
+    update.form = updateForm
+const ProfileController = { show, update }
 
 export default ProfileController

@@ -75,7 +75,8 @@ it('creates tenant accounts only after the tenant email is verified', function (
 
     $this->postJson($verificationUrl)
         ->assertOk()
-        ->assertJsonPath('message', 'Email verified. You can now sign in.');
+        ->assertSee('Email confirmed')
+        ->assertSee('Account successfully activated');
 
     expect(User::query()->where('email', $tenant->email)->exists())->toBeTrue()
         ->and($tenant->fresh()->user_id)->not->toBeNull()
@@ -87,17 +88,17 @@ it('creates tenant accounts only after the tenant email is verified', function (
     ])->assertOk();
 });
 
-it('does not reveal whether an email belongs to a tenant during registration', function () {
+it('explains when an email does not match an active tenant during registration', function () {
     Notification::fake();
 
     $this->postJson('/api/v1/register', [
         'email' => 'not-a-tenant@example.test',
         'password' => 'strong-password',
         'password_confirmation' => 'strong-password',
-    ])->assertAccepted()
+    ])->assertUnprocessable()
         ->assertJsonPath(
             'message',
-            'If your email matches an active tenant record, a verification link has been sent.',
+            'No active tenant record was found for this email. Please use the email your landlord registered for you.',
         );
 
     Notification::assertNothingSent();

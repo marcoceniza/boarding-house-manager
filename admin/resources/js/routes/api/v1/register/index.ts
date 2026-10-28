@@ -2,7 +2,7 @@ import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFo
 import verify8ef1b2 from './verify'
 /**
 * @see \App\Http\Controllers\Api\Auth\TenantRegistrationController::verify
- * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:70
+ * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:75
  * @route '/api/v1/register/verify/{token}'
  */
 export const verify = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -17,7 +17,7 @@ verify.definition = {
 
 /**
 * @see \App\Http\Controllers\Api\Auth\TenantRegistrationController::verify
- * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:70
+ * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:75
  * @route '/api/v1/register/verify/{token}'
  */
 verify.url = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -45,7 +45,7 @@ verify.url = (args: { token: string | number } | [token: string | number ] | str
 
 /**
 * @see \App\Http\Controllers\Api\Auth\TenantRegistrationController::verify
- * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:70
+ * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:75
  * @route '/api/v1/register/verify/{token}'
  */
 verify.get = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -54,7 +54,7 @@ verify.get = (args: { token: string | number } | [token: string | number ] | str
 })
 /**
 * @see \App\Http\Controllers\Api\Auth\TenantRegistrationController::verify
- * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:70
+ * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:75
  * @route '/api/v1/register/verify/{token}'
  */
 verify.head = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -64,7 +64,7 @@ verify.head = (args: { token: string | number } | [token: string | number ] | st
 
     /**
 * @see \App\Http\Controllers\Api\Auth\TenantRegistrationController::verify
- * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:70
+ * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:75
  * @route '/api/v1/register/verify/{token}'
  */
     const verifyForm = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -74,7 +74,7 @@ verify.head = (args: { token: string | number } | [token: string | number ] | st
 
             /**
 * @see \App\Http\Controllers\Api\Auth\TenantRegistrationController::verify
- * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:70
+ * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:75
  * @route '/api/v1/register/verify/{token}'
  */
         verifyForm.get = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -83,7 +83,7 @@ verify.head = (args: { token: string | number } | [token: string | number ] | st
         })
             /**
 * @see \App\Http\Controllers\Api\Auth\TenantRegistrationController::verify
- * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:70
+ * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:75
  * @route '/api/v1/register/verify/{token}'
  */
         verifyForm.head = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({

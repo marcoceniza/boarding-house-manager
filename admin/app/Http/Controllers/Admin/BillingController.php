@@ -36,7 +36,7 @@ class BillingController extends Controller
         };
         $billings = Billing::with('tenant.room')
             ->whereDoesntHave('tenant', fn ($query) => $query->where('status', 2))
-            ->whereDate('created_at', $date)
+            ->where('billing_period', $month)
             ->latest()
             ->paginate(10)
             ->withQueryString();

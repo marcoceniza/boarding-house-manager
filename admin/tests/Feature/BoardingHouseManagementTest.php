@@ -362,8 +362,9 @@ it('shows only the current month billings by default', function () {
             ->component('billings/Index')
             ->where('month', '2026-10')
             ->where('date', '2026-10-22')
-            ->has('billings.data', 1)
+            ->has('billings.data', 2)
             ->where('billings.data.0.billing_period', '2026-10')
+            ->where('billings.data.1.billing_period', '2026-10')
             ->has('billedTenantIds', 2));
 
     $this->actingAs(User::factory()->create())
@@ -373,8 +374,9 @@ it('shows only the current month billings by default', function () {
             ->component('billings/Index')
             ->where('date', '2026-10-21')
             ->where('month', '2026-10')
-            ->has('billings.data', 1)
-            ->where('billings.data.0.billing_period', '2026-10'));
+            ->has('billings.data', 2)
+            ->where('billings.data.0.billing_period', '2026-10')
+            ->where('billings.data.1.billing_period', '2026-10'));
 
     $this->actingAs(User::factory()->create())
         ->get(route('dashboard.billings.index', ['date' => '2026-10-23']))
@@ -382,7 +384,7 @@ it('shows only the current month billings by default', function () {
         ->assertInertia(fn (Assert $page) => $page
             ->component('billings/Index')
             ->where('date', '2026-10-23')
-            ->has('billings.data', 0));
+            ->has('billings.data', 2));
 });
 
 it('keeps former tenant billings in the archive instead of the current list', function () {

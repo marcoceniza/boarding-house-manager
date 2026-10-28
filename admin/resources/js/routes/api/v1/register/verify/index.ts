@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\Api\Auth\TenantRegistrationController::confirm
- * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:77
+ * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:82
  * @route '/api/v1/register/verify/{token}'
  */
 export const confirm = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -16,7 +16,7 @@ confirm.definition = {
 
 /**
 * @see \App\Http\Controllers\Api\Auth\TenantRegistrationController::confirm
- * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:77
+ * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:82
  * @route '/api/v1/register/verify/{token}'
  */
 confirm.url = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -44,7 +44,7 @@ confirm.url = (args: { token: string | number } | [token: string | number ] | st
 
 /**
 * @see \App\Http\Controllers\Api\Auth\TenantRegistrationController::confirm
- * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:77
+ * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:82
  * @route '/api/v1/register/verify/{token}'
  */
 confirm.post = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -54,7 +54,7 @@ confirm.post = (args: { token: string | number } | [token: string | number ] | s
 
     /**
 * @see \App\Http\Controllers\Api\Auth\TenantRegistrationController::confirm
- * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:77
+ * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:82
  * @route '/api/v1/register/verify/{token}'
  */
     const confirmForm = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -64,7 +64,7 @@ confirm.post = (args: { token: string | number } | [token: string | number ] | s
 
             /**
 * @see \App\Http\Controllers\Api\Auth\TenantRegistrationController::confirm
- * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:77
+ * @see app/Http/Controllers/Api/Auth/TenantRegistrationController.php:82
  * @route '/api/v1/register/verify/{token}'
  */
         confirmForm.post = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

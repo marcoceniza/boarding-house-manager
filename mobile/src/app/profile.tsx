@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { RESIDENT_SESSION_KEY, useResidentSession } from '@/hooks/use-resident-session';
 import { getBillStatus } from '@/utils/billing';
+import { apiService } from '@/services/api';
 
 import { BottomBar } from '@/components/ui/BottomBar';
 import ProfileScreen from '@/screens/tabs/ProfileScreen';
@@ -41,8 +42,28 @@ export default function ProfileRoute() {
                 Alert.alert('Unable to sign out', 'Please try again.');
               });
           }}
-          onUpdate={(updates) => {
-            setSession((current) => ({ ...current, tenant: { ...current.tenant, ...updates } }));
+          onUpdate={async (updates) => {
+            try {
+              const response = await apiService.auth.updateProfile({
+                first_name: updates.firstName,
+                last_name: updates.lastName,
+                phone: updates.phone,
+                emergency_contact: updates.emergencyContact,
+              });
+              const t = response.data;
+              setSession((current) => ({
+                ...current,
+                tenant: {
+                  ...current.tenant,
+                  firstName: t.first_name,
+                  lastName: t.last_name,
+                  phone: t.phone ?? '',
+                  emergencyContact: t.emergency_contact ?? '',
+                },
+              }));
+            } catch {
+              Alert.alert('Update failed', 'Unable to save your changes. Please try again.');
+            }
           }}
           tenant={session.tenant}
         />

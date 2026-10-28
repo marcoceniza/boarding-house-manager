@@ -15,7 +15,7 @@ export function StatusPill({ status }: { status: BillStatus }) {
   }[status];
   return (
     <View className={`rounded-full px-[9px] py-[5px] ${appearance.container}`}>
-      <Text className={`text-[10px] font-extrabold ${appearance.textStyle}`}>{appearance.text}</Text>
+      <Text className={`text-sm font-extrabold ${appearance.textStyle}`}>{appearance.text}</Text>
     </View>
   );
 }
@@ -34,20 +34,20 @@ export function BillCard({
     <Surface className="p-3.5">
       <View className="flex-row items-center justify-between gap-2.5">
         <View className="flex-1">
-          <Label>Billing period</Label>
-          <Text className="text-base font-extrabold text-ink">{bill.billingPeriod}</Text>
+          <Label className='text-base'>Billing period</Label>
+          <Text className="text-lg font-extrabold text-ink">{bill.billingPeriod}</Text>
         </View>
         <StatusPill status={status} />
       </View>
       <View className={`flex-row items-center justify-between gap-2.5 mb-2.5 mt-3 border-t border-soft pt-2.5`}>
-        <Text className="text-xs leading-[18px] text-secondary">
+        <Text className="text-base leading-[18px] text-secondary">
           {status === 'paid' && bill.paidDate
             ? `Paid on ${formatDate(bill.paidDate)}`
             : `Due on ${formatDate(bill.dueDate)}`}
         </Text>
         <View className="items-end">
-          <Label>Total</Label>
-          <Text className="text-[17px] font-black text-ink">{formatPHP(bill.total)}</Text>
+          <Label className='text-sm'>Total</Label>
+          <Text className="text-xl font-black text-ink">{formatPHP(bill.total)}</Text>
         </View>
       </View>
       <View className="flex-row items-center justify-between gap-2.5">
@@ -56,7 +56,7 @@ export function BillCard({
           accessibilityState={{ expanded }}
           onPress={() => setExpanded(!expanded)}
           className="min-h-[34px] justify-center">
-          <Text className="text-[11px] font-bold text-secondary">
+          <Text className="text-base font-bold text-secondary">
             {expanded ? 'Hide breakdown  −' : 'Quick breakdown  +'}
           </Text>
         </Pressable>
@@ -64,22 +64,22 @@ export function BillCard({
           accessibilityRole="button"
           onPress={() => onOpen(bill)}
           className="min-h-[34px] justify-center">
-          <Text className={`text-[11px] font-bold text-secondary font-extrabold text-green`}>Full statement  ›</Text>
+          <Text className={`text-base font-bold text-secondary font-extrabold text-green`}>Full statement  ›</Text>
         </Pressable>
       </View>
       {expanded && (
         <View className="mt-2 gap-2 rounded-xl bg-soft p-[11px]">
           <View className="flex-row items-center justify-between gap-2.5">
-            <Text className="text-xs leading-[18px] text-secondary">Room rent</Text>
-            <Text className="text-xs font-bold text-ink">{formatPHP(bill.breakdown.rent)}</Text>
+            <Text className="text-base leading-[18px] text-secondary">Room rent</Text>
+            <Text className="text-base font-bold text-ink">{formatPHP(bill.breakdown.rent)}</Text>
           </View>
           <View className="flex-row items-center justify-between gap-2.5">
-            <Text className="text-xs leading-[18px] text-secondary">Water</Text>
-            <Text className="text-xs font-bold text-ink">{formatPHP(bill.breakdown.water)}</Text>
+            <Text className="text-base leading-[18px] text-secondary">Water</Text>
+            <Text className="text-base font-bold text-ink">{formatPHP(bill.breakdown.water)}</Text>
           </View>
           <View className="flex-row items-center justify-between gap-2.5">
-            <Text className="text-xs leading-[18px] text-secondary">Electricity</Text>
-            <Text className="text-xs font-bold text-ink">{formatPHP(bill.breakdown.electricity)}</Text>
+            <Text className="text-base leading-[18px] text-secondary">Electricity</Text>
+            <Text className="text-base font-bold text-ink">{formatPHP(bill.breakdown.electricity)}</Text>
           </View>
         </View>
       )}

@@ -6,10 +6,10 @@ export function DetailLine({ label, detail, amount }: { label: string; detail: s
   return (
     <View className="flex-row items-center justify-between border-b border-soft py-2.5">
       <View className="flex-1">
-        <Text className="text-xs font-bold text-ink">{label}</Text>
-        <Text className="mt-0.5 text-xs leading-[18px] text-secondary">{detail}</Text>
+        <Text className="text-base font-bold text-ink">{label}</Text>
+        <Text className="mt-0.5 text-base leading-[18px] text-secondary">{detail}</Text>
       </View>
-      <Text className="text-xs font-bold text-ink">{formatPHP(amount, true)}</Text>
+      <Text className="text-base font-bold text-ink">{formatPHP(amount, true)}</Text>
     </View>
   );
 }

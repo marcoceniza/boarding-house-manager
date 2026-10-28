@@ -17,6 +17,8 @@ class TenantProfileResource extends JsonResource
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
             'email' => $this->email,
+            'phone' => $this->phone ?? '',
+            'emergency_contact' => $this->emergency_contact ?? '',
             'move_in_date' => $this->move_in_date->toDateString(),
             'ended_at' => $this->ended_at?->toISOString(),
             'status' => $this->status,
