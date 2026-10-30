@@ -12,20 +12,22 @@ Route::get('/health', function () {
 })->name('health');
 
 Route::prefix('v1')->name('api.v1.')->group(function (): void {
+    // Public endpoints with stricter rate limiting
     Route::post('/register', [TenantRegistrationController::class, 'store'])
-        ->middleware('throttle:5,1')
+        ->middleware(['throttle:api.register'])
         ->name('register');
     Route::get('/register/verify/{token}', [TenantRegistrationController::class, 'verify'])
-        ->middleware(['signed', 'throttle:6,1'])
+        ->middleware(['signed', 'throttle:api.verification'])
         ->name('register.verify');
     Route::post('/register/verify/{token}', [TenantRegistrationController::class, 'confirm'])
-        ->middleware(['signed', 'throttle:6,1'])
+        ->middleware(['signed', 'throttle:api.verification'])
         ->name('register.verify.confirm');
     Route::post('/login', [AuthenticationController::class, 'store'])
-        ->middleware('throttle:5,1')
+        ->middleware('throttle:api.login')
         ->name('login');
 
-    Route::middleware('auth:sanctum')->group(function (): void {
+    // Authenticated endpoints with appropriate rate limiting
+    Route::middleware(['auth:sanctum', 'throttle:api.authenticated'])->group(function (): void {
         Route::post('/logout', [AuthenticationController::class, 'destroy'])->name('logout');
         Route::get('/me', [ProfileController::class, 'show'])->name('me.show');
         Route::patch('/me', [ProfileController::class, 'update'])->name('me.update');
