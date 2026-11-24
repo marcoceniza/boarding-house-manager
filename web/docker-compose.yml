@@ -1,0 +1,48 @@
+# Laravel app containers connect to the shared MySQL Compose project.
+# See C:/Users/marco/docker/database/compose.yml for the database services.
+# MySQL is managed in Docker and is reachable by this app on the database network.
+
+name: boarding-house-manager
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: boarding-house-app
+    restart: unless-stopped
+    ports:
+      - '0.0.0.0:8002:8000'
+    volumes:
+      - .:/var/www/html
+    environment:
+      APP_ENV: local
+      APP_DEBUG: 'true'
+      APP_URL: http://localhost:8002
+      DB_CONNECTION: ${DB_CONNECTION:-mysql}
+      DB_HOST: ${DB_HOST:-mysql}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_DATABASE: ${DB_DATABASE:?Set DB_DATABASE in web/.env}
+      DB_USERNAME: ${DB_USERNAME:?Set DB_USERNAME in web/.env}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in web/.env}
+    command:
+      - sh
+      - /var/www/html/docker/wait-for-db.sh
+      - php
+      - artisan
+      - serve
+      - --host=0.0.0.0
+      - --port=8000
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8000/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 30s
+    networks:
+      - database
+
+networks:
+  database:
+    external: true
+    name: database
